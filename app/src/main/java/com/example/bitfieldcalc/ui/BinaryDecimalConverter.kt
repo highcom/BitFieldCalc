@@ -13,14 +13,30 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bitfieldcalc.ui.viewmodel.BinaryDecimalViewModel
 
+@Composable
+fun BinaryDecimalConverterCompose(viewModel: BinaryDecimalViewModel = viewModel()) {
+    BinaryDecimalConverter(
+        input = viewModel.input.value,
+        result = viewModel.result.value,
+        isBinaryMode = viewModel.isBinaryMode.value,
+        onToggleMode = { viewModel.toggleMode() },
+        onKeyClick = { viewModel.updateInput(it) },
+        onClear = { viewModel.clearInput() },
+        onConvert = { viewModel.convert() }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BinaryDecimalConverter(viewModel: BinaryDecimalViewModel = viewModel()) {
-    // ViewModelから状態を取得
-    val input = viewModel.input.value
-    val result = viewModel.result.value
-    val isBinaryMode = viewModel.isBinaryMode.value
-
+fun BinaryDecimalConverter(
+    input: String = "",
+    result: String = "",
+    isBinaryMode: Boolean = true,
+    onToggleMode: () -> Unit = {},
+    onKeyClick: (String) -> Unit = {},
+    onClear: () -> Unit = {},
+    onConvert: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -31,7 +47,7 @@ fun BinaryDecimalConverter(viewModel: BinaryDecimalViewModel = viewModel()) {
         // モード切り替えボタン（色で状態を視覚化）
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(
-                onClick = { viewModel.toggleMode() },
+                onClick = { onToggleMode() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isBinaryMode) Color.Green else Color.Gray
                 )
@@ -39,7 +55,7 @@ fun BinaryDecimalConverter(viewModel: BinaryDecimalViewModel = viewModel()) {
                 Text("2進数 -> 10進数")
             }
             Button(
-                onClick = { viewModel.toggleMode() },
+                onClick = { onToggleMode() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (!isBinaryMode) Color.Green else Color.Gray
                 )
@@ -65,14 +81,14 @@ fun BinaryDecimalConverter(viewModel: BinaryDecimalViewModel = viewModel()) {
         // テンキーボタン
         Keypad(
             isBinaryMode = isBinaryMode,
-            onKeyClick = { viewModel.updateInput(it) },
-            onClear = { viewModel.clearInput() }
+            onKeyClick = onKeyClick,
+            onClear = onClear
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // 変換ボタン
-        Button(onClick = { viewModel.convert() }) {
+        Button(onClick = { onConvert() }) {
             Text("変換")
         }
 
