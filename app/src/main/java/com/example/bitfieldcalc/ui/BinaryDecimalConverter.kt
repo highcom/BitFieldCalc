@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bitfieldcalc.ui.viewmodel.BinaryDecimalViewModel
@@ -37,13 +39,26 @@ fun BinaryDecimalConverter(
     onClear: () -> Unit = {},
     onConvert: () -> Unit = {}
 ) {
+    // 2進数モードの時、4桁ずつ区切って表示
+    val formattedInput = if (isBinaryMode) formatBinaryInput(input) else input
+
+    // 2進数結果を4桁ずつ区切る
+    val formattedResult = if (!isBinaryMode && result.isNotEmpty()) formatBinaryInput(result) else result
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top // 結果表示エリアを上に持っていく
     ) {
+        // 結果表示
+        Text(
+            text = formattedResult.ifEmpty { "結果" },
+            fontSize = 24.sp,
+            modifier = Modifier.padding(bottom = 16.dp) // 結果表示の下に余白
+        )
+
         // モード切り替えボタン（色で状態を視覚化）
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(
@@ -66,13 +81,14 @@ fun BinaryDecimalConverter(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 入力フィールド
+        // 入力フィールド (右詰め入力)
         OutlinedTextField(
-            value = input,
+            value = formattedInput,
             onValueChange = {},
             label = { Text("Enter value") },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(textAlign = TextAlign.End, fontSize = 24.sp),  // 右詰め
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -91,21 +107,11 @@ fun BinaryDecimalConverter(
         Button(onClick = { onConvert() }) {
             Text("変換")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 結果表示
-        Text(
-            text = if (result.isEmpty()) "結果" else result,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(top = 16.dp)
-        )
     }
 }
 
 @Composable
 fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> Unit) {
-    // 2進数モードかどうかで表示するボタンを変更
     val buttonValues = if (isBinaryMode) {
         listOf(
             listOf("1", "0", "C")
@@ -133,7 +139,7 @@ fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> U
                         onClick = {
                             when (value) {
                                 "C" -> onClear()
-                                "=" -> {}  // 変換処理は既にメインでやっているのでここでは何もしない
+                                "=" -> {} // 変換処理はメインでやっているのでここでは何もしない
                                 else -> onKeyClick(value)
                             }
                         },
@@ -148,3 +154,10 @@ fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> U
     }
 }
 
+// 2進数の入力を4桁ごとに区切る関数
+fun formatBinaryInput(input: String): String {
+    // 逆順にして4桁ごとに区切り、再度逆順に戻す
+    val reversedInput = input.reversed()
+    val chunked = reversedInput.chunked(4).joinToString(" ")
+    return chunked.reversed() // 最後に逆順に戻す
+}
