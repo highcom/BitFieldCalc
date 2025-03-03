@@ -1,16 +1,14 @@
 package com.example.bitfieldcalc.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bitfieldcalc.ui.viewmodel.BinaryDecimalViewModel
@@ -56,6 +54,7 @@ fun BinaryDecimalConverter(
         Text(
             text = formattedResult.ifEmpty { "結果" },
             fontSize = 24.sp,
+            textAlign = TextAlign.End,
             modifier = Modifier.padding(bottom = 16.dp) // 結果表示の下に余白
         )
 
@@ -81,23 +80,36 @@ fun BinaryDecimalConverter(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 入力フィールド (右詰め入力)
-        OutlinedTextField(
-            value = formattedInput,
-            onValueChange = {},
-            label = { Text("Enter value") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            textStyle = TextStyle(textAlign = TextAlign.End, fontSize = 24.sp),  // 右詰め
-            modifier = Modifier.fillMaxWidth()
-        )
+        // 入力フィールド (Textで表示、折り返し対応)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp) // 最小の高さを確保
+                .padding(8.dp)
+        ) {
+            Text(
+                text = formattedInput,
+                fontSize = 24.sp,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp), // 内側に余白を追加
+                maxLines = 5, // 最大行数の設定
+                overflow = TextOverflow.Clip // 省略なしで表示
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // テンキーボタン
         Keypad(
             isBinaryMode = isBinaryMode,
-            onKeyClick = onKeyClick,
+            onKeyClick = { key ->
+                // 64桁制限をここでかける
+                if (input.length < 64) {
+                    onKeyClick(key)
+                }
+            },
             onClear = onClear
         )
 
@@ -154,10 +166,28 @@ fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> U
     }
 }
 
-// 2進数の入力を4桁ごとに区切る関数
+// 2進数の入力を4桁ごとに区切り、文字数で折り返す関数
 fun formatBinaryInput(input: String): String {
-    // 逆順にして4桁ごとに区切り、再度逆順に戻す
-    val reversedInput = input.reversed()
-    val chunked = reversedInput.chunked(4).joinToString(" ")
-    return chunked.reversed() // 最後に逆順に戻す
+    val result = StringBuilder()
+    val currentLine = StringBuilder()
+
+    // 4桁ごとに分割して、1行19桁になるように調整
+    input.reversed().forEachIndexed { index, char ->
+        currentLine.append(char)
+        // 4桁ごとにスペースを挿入
+        if ((index + 1) % 4 == 0) {
+            currentLine.append(" ")
+        }
+        // 19桁ごとに折り返し
+        if (currentLine.length >= 19) {
+            result.append(currentLine.toString().trim()).append("\n")
+            currentLine.clear()
+        }
+    }
+    // 最後に残った部分も追加
+    if (currentLine.isNotEmpty()) {
+        result.append(currentLine.toString().trim())
+    }
+
+    return result.reversed().toString()
 }
