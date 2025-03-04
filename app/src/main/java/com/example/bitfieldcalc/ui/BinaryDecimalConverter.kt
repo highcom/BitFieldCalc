@@ -14,28 +14,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bitfieldcalc.ui.viewmodel.BinaryDecimalViewModel
 
 @Composable
-fun BinaryDecimalConverterCompose(viewModel: BinaryDecimalViewModel = viewModel()) {
-    BinaryDecimalConverter(
+fun BinaryDecimalCalculatorCompose(viewModel: BinaryDecimalViewModel = viewModel()) {
+    BinaryDecimalCalculator(
         input = viewModel.input.value,
         result = viewModel.result.value,
         isBinaryMode = viewModel.isBinaryMode.value,
         onToggleMode = { viewModel.toggleMode() },
         onKeyClick = { viewModel.updateInput(it) },
         onClear = { viewModel.clearInput() },
-        onConvert = { viewModel.convert() }
+        onConvert = { viewModel.convert() },
+        onCalculate = { input, isBinaryMode -> viewModel.calculate(input, isBinaryMode) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BinaryDecimalConverter(
+fun BinaryDecimalCalculator(
     input: String = "",
     result: String = "",
     isBinaryMode: Boolean = true,
     onToggleMode: () -> Unit = {},
     onKeyClick: (String) -> Unit = {},
     onClear: () -> Unit = {},
-    onConvert: () -> Unit = {}
+    onConvert: () -> Unit = {},
+    onCalculate: (String, Boolean) -> Unit = { _, _ -> }
 ) {
     // 2進数モードの時、4桁ずつ区切って表示
     val formattedInput = if (isBinaryMode) formatBinaryInput(input) else input
@@ -103,14 +104,15 @@ fun BinaryDecimalConverter(
 
         // テンキーボタン
         Keypad(
+            input = input,  // inputを渡す
             isBinaryMode = isBinaryMode,
             onKeyClick = { key ->
-                // 64桁制限をここでかける
                 if (input.length < 64) {
                     onKeyClick(key)
                 }
             },
-            onClear = onClear
+            onClear = onClear,
+            onCalculate = onCalculate  // 計算処理を追加
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -123,17 +125,25 @@ fun BinaryDecimalConverter(
 }
 
 @Composable
-fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> Unit) {
+fun Keypad(
+    input: String,
+    isBinaryMode: Boolean,
+    onKeyClick: (String) -> Unit,
+    onClear: () -> Unit,
+    onCalculate: (String, Boolean) -> Unit // 計算処理を渡す
+) {
+    // 電卓機能（加減乗除）
     val buttonValues = if (isBinaryMode) {
         listOf(
-            listOf("1", "0", "C")
+            listOf("1", "0", "C", "="),
+            listOf("+", "-", "*", "/")
         )
     } else {
         listOf(
-            listOf("1", "2", "3"),
-            listOf("4", "5", "6"),
-            listOf("7", "8", "9"),
-            listOf("C", "0", "=")
+            listOf("1", "2", "3", "+"),
+            listOf("4", "5", "6", "-"),
+            listOf("7", "8", "9", "*"),
+            listOf("C", "0", "=", "/")
         )
     }
 
@@ -151,8 +161,8 @@ fun Keypad(isBinaryMode: Boolean, onKeyClick: (String) -> Unit, onClear: () -> U
                         onClick = {
                             when (value) {
                                 "C" -> onClear()
-                                "=" -> {} // 変換処理はメインでやっているのでここでは何もしない
-                                else -> onKeyClick(value)
+                                "=" -> onCalculate(input, isBinaryMode)  // 計算処理を実行
+                                else -> onKeyClick(value)  // 入力処理
                             }
                         },
                         modifier = Modifier.weight(1f)

@@ -9,8 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.bitfieldcalc.ui.BinaryDecimalConverter
-import com.example.bitfieldcalc.ui.BinaryDecimalConverterCompose
+import com.example.bitfieldcalc.ui.BinaryDecimalCalculator
+import com.example.bitfieldcalc.ui.BinaryDecimalCalculatorCompose
 import com.example.bitfieldcalc.ui.theme.BitFieldCalcTheme
 
 class BitFieldCalcActivity : ComponentActivity() {
@@ -20,7 +20,7 @@ class BitFieldCalcActivity : ComponentActivity() {
             BitFieldCalcTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    BinaryDecimalConverterCompose()
+                    BinaryDecimalCalculatorCompose()
                 }
             }
         }
@@ -31,6 +31,6 @@ class BitFieldCalcActivity : ComponentActivity() {
 @Composable
 fun BitFieldCalcPreview() {
     BitFieldCalcTheme {
-        BinaryDecimalConverter()
+        BinaryDecimalCalculator()
     }
 }
