@@ -50,17 +50,20 @@ fun MainCalculationScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             // Pinned structures tabs
-            ScrollableTabRow(
-                selectedTabIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }.coerceAtLeast(0),
-                edgePadding = 8.dp,
-                divider = {}
-            ) {
-                pinnedStructures.forEach { item ->
-                    Tab(
-                        selected = selectedStructure?.structure?.id == item.structure.id,
-                        onClick = { viewModel.selectStructure(item) },
-                        text = { Text(item.structure.name) }
-                    )
+            if (pinnedStructures.isNotEmpty()) {
+                ScrollableTabRow(
+                    selectedTabIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }
+                        .coerceAtLeast(0),
+                    edgePadding = 8.dp,
+                    divider = {}
+                ) {
+                    pinnedStructures.forEach { item ->
+                        Tab(
+                            selected = selectedStructure?.structure?.id == item.structure.id,
+                            onClick = { viewModel.selectStructure(item) },
+                            text = { Text(item.structure.name) }
+                        )
+                    }
                 }
             }
 
