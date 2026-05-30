@@ -2,6 +2,8 @@ package com.example.bitfieldcalc.ui.calculation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.List
@@ -48,66 +50,81 @@ fun MainCalculationScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            // Pinned structures tabs
-            if (pinnedStructures.isNotEmpty()) {
-                ScrollableTabRow(
-                    selectedTabIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }
-                        .coerceAtLeast(0),
-                    edgePadding = 8.dp,
-                    divider = {}
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // 上部エリア（スクロール可能）: 画面の約2/3を割り当て
+            Column(
+                modifier = Modifier
+                    .weight(2f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Pinned structures tabs
+                if (pinnedStructures.isNotEmpty()) {
+                    ScrollableTabRow(
+                        selectedTabIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }
+                            .coerceAtLeast(0),
+                        edgePadding = 8.dp,
+                        divider = {}
+                    ) {
+                        pinnedStructures.forEach { item ->
+                            Tab(
+                                selected = selectedStructure?.structure?.id == item.structure.id,
+                                onClick = { viewModel.selectStructure(item) },
+                                text = { Text(item.structure.name) }
+                            )
+                        }
+                    }
+                }
+
+                // Current structure selector
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showSelector = true }
+                        .padding(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small
                 ) {
-                    pinnedStructures.forEach { item ->
-                        Tab(
-                            selected = selectedStructure?.structure?.id == item.structure.id,
-                            onClick = { viewModel.selectStructure(item) },
-                            text = { Text(item.structure.name) }
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "現在の構造体: ▼ ${selectedStructure?.structure?.name ?: "選択されていません"}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
+
+                BitGrid(
+                    value = rawValue,
+                    isMsbFirst = isMsbFirst,
+                    onToggle = { idx -> viewModel.toggleBit(idx) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                NumberInputFields(
+                    hex = hex,
+                    dec = dec,
+                    bin = bin,
+                    onHexChanged = { viewModel.updateRawValueFromHex(it) },
+                    onDecChanged = { viewModel.updateRawValueFromDec(it) },
+                    onBinChanged = { viewModel.updateRawValueFromBin(it) }
+                )
             }
 
-            // Current structure selector
-            Surface(
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            // 下部エリア（デコード結果）: 画面の約1/3を割り当て
+            Box(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .clickable { showSelector = true }
-                    .padding(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = MaterialTheme.shapes.small
             ) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "現在の構造体: ▼ ${selectedStructure?.structure?.name ?: "選択されていません"}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                DecodedFieldsList(fields = decodedResults)
             }
-
-            BitGrid(
-                value = rawValue,
-                isMsbFirst = isMsbFirst,
-                onToggle = { idx -> viewModel.toggleBit(idx) }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            NumberInputFields(
-                hex = hex,
-                dec = dec,
-                bin = bin,
-                onHexChanged = { viewModel.updateRawValueFromHex(it) },
-                onDecChanged = { viewModel.updateRawValueFromDec(it) },
-                onBinChanged = { viewModel.updateRawValueFromBin(it) }
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            DecodedFieldsList(fields = decodedResults)
         }
     }
 

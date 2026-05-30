@@ -30,7 +30,7 @@ fun BitGrid(
         
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
-            modifier = Modifier.height(300.dp)
+            modifier = Modifier.height(240.dp)
         ) {
             items(64) { index ->
                 val bitIndex = if (isMsbFirst) 63 - index else index
