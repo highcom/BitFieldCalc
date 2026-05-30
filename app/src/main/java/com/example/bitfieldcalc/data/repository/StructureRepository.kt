@@ -37,11 +37,19 @@ class StructureRepository(
     suspend fun insertStructureWithFields(structure: StructureEntity, fields: List<FieldEntity>) {
         db.withTransaction {
             val newId = structureDao.insert(structure)
+            // If it's an update, we replace all fields
+            if (structure.id != 0L) {
+                fieldDao.deleteByStructureId(structure.id)
+            }
             if (fields.isNotEmpty()) {
-                val fieldsWithParent = fields.map { it.copy(structureId = newId) }
+                val fieldsWithParent = fields.map { it.copy(id = 0L, structureId = newId) }
                 fieldDao.insertAll(fieldsWithParent)
             }
         }
+    }
+
+    suspend fun updateStructure(structure: StructureEntity) {
+        structureDao.update(structure)
     }
 
     suspend fun deleteStructure(structureId: Long) {

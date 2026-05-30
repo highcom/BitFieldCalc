@@ -7,7 +7,7 @@ import com.example.bitfieldcalc.data.db.dao.StructureDao
 import com.example.bitfieldcalc.data.db.entity.FieldEntity
 import com.example.bitfieldcalc.data.db.entity.StructureEntity
 
-@Database(entities = [StructureEntity::class, FieldEntity::class], version = 1, exportSchema = false)
+@Database(entities = [StructureEntity::class, FieldEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun structureDao(): StructureDao
     abstract fun fieldDao(): FieldDao

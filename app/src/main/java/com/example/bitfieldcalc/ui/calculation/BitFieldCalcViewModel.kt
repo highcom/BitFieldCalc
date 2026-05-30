@@ -44,10 +44,14 @@ class BitFieldCalcViewModel @Inject constructor(
 
     val decodedResults = combine(_rawValue, _selectedStructure) { value, structure ->
         structure?.fields?.map { field ->
-            val fieldVal = BitCalculator.extractFieldValue(value, field.msb, field.lsb, field.isSigned)
-            val hexVal = "0x" + fieldVal.toString(16).uppercase()
-            val decVal = fieldVal.toString(10)
-            FieldResult(field.fieldName, hexVal, decVal, field.msb, field.lsb)
+            try {
+                val fieldVal = BitCalculator.extractFieldValue(value, field.msb, field.lsb, field.isSigned)
+                val hexVal = "0x" + fieldVal.toString(16).uppercase()
+                val decVal = fieldVal.toString(10)
+                FieldResult(field.fieldName, hexVal, decVal, field.msb, field.lsb)
+            } catch (e: IllegalArgumentException) {
+                FieldResult(field.fieldName, "Error", "Invalid range", field.msb, field.lsb)
+            }
         } ?: emptyList()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

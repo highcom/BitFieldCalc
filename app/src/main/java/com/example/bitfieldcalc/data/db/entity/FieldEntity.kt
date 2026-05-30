@@ -5,7 +5,17 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "fields")
+@Entity(
+    tableName = "fields",
+    foreignKeys = [
+        ForeignKey(
+            entity = StructureEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["structure_id"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class FieldEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")

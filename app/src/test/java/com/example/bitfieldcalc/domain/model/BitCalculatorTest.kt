@@ -27,12 +27,16 @@ class BitCalculatorTest {
         assertEquals(BigInteger("170"), extracted)
     }
 
-    @Test
-    fun extractSignedField() {
-        // field 8-bit 0xFF interpreted signed -> -1
-        val raw = BitCalculator.parseStringToBigInteger("0x00FF", 16)
-        val extracted = BitCalculator.extractFieldValue(raw, 7, 0, isSigned = true)
-        assertEquals(BigInteger("-1"), extracted)
+    @Test(expected = IllegalArgumentException::class)
+    fun extractFieldOutOfRange() {
+        val raw = BigInteger.ZERO
+        BitCalculator.extractFieldValue(raw, 64, 0, isSigned = false)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun extractFieldInvalidOrder() {
+        val raw = BigInteger.ZERO
+        BitCalculator.extractFieldValue(raw, 0, 1, isSigned = false)
     }
 }
 

@@ -50,6 +50,7 @@ class StructureViewModel @Inject constructor(
         val ranges = mutableListOf<Pair<IntRange, String>>()
         for (f in fields) {
             if (f.fieldName.isBlank()) return false to "フィールド名を入力してください"
+            if (f.msb < 0 || f.msb > 63 || f.lsb < 0 || f.lsb > 63) return false to "ビット範囲は0〜63の間である必要があります (${f.fieldName})"
             if (f.msb < f.lsb) return false to "MSBはLSB以上である必要があります (${f.fieldName})"
             ranges.add((f.lsb..f.msb) to f.fieldName)
         }
@@ -104,7 +105,7 @@ class StructureViewModel @Inject constructor(
     fun updateSortOrder(structures: List<StructureEntity>) {
         viewModelScope.launch {
             for ((index, s) in structures.withIndex()) {
-                repository.insertStructureWithFields(s.copy(sortOrder = index), emptyList())
+                repository.updateStructure(s.copy(sortOrder = index))
             }
         }
     }

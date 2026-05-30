@@ -19,7 +19,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(context, AppDatabase::class.java, "bitfield-db").build()
+        return Room.databaseBuilder(context, AppDatabase::class.java, "bitfield-db")
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
