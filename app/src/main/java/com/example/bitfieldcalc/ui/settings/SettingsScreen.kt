@@ -1,37 +1,74 @@
 package com.example.bitfieldcalc.ui.settings
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
-    val isBigEndian = remember { mutableStateOf(false) }
-    val isMsbFirst = remember { mutableStateOf(true) }
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onBack: () -> Unit
+) {
+    val isBigEndian by viewModel.isBigEndian.collectAsState()
+    val isMsbFirst by viewModel.isMsbFirst.collectAsState()
 
-    Column(modifier = Modifier.padding(8.dp)) {
-        Text("Global Settings")
-        Text("Big Endian")
-        Switch(checked = isBigEndian.value, onCheckedChange = { isBigEndian.value = it })
-
-        Text("MSB First")
-        Switch(checked = isMsbFirst.value, onCheckedChange = { isMsbFirst.value = it })
-
-        Button(onClick = { /* TODO: export */ }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-            Text("Export JSON")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("グローバル設定") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
         }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "エンディアン (Big Endian)", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = isBigEndian,
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(it, isMsbFirst) }
+                )
+            }
 
-        Button(onClick = { /* TODO: import */ }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Text("Import JSON")
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "ビットオーダー (MSB First)", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = isMsbFirst,
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(isBigEndian, it) }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(text = "データ管理", style = MaterialTheme.typography.titleMedium)
+            
+            Button(
+                onClick = { /* TODO: Implement Export */ },
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            ) {
+                Text("構造体データをエクスポート (JSON)")
+            }
+
+            Button(
+                onClick = { /* TODO: Implement Import */ },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            ) {
+                Text("構造体データをインポート (JSON)")
+            }
         }
     }
 }
-

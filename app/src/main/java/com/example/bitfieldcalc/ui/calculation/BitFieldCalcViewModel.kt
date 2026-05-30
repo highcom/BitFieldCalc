@@ -1,29 +1,31 @@
 package com.example.bitfieldcalc.ui.calculation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.bitfieldcalc.data.db.entity.StructureWithFields
+import com.example.bitfieldcalc.data.repository.StructureRepository
+import com.example.bitfieldcalc.data.repository.SettingsRepository
+import com.example.bitfieldcalc.domain.model.BitCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigInteger
-import com.example.bitfieldcalc.data.repository.StructureRepository
-import com.example.bitfieldcalc.domain.model.BitCalculator
+import javax.inject.Inject
 
 @HiltViewModel
 class BitFieldCalcViewModel @Inject constructor(
-    private val repository: StructureRepository
+    private val repository: StructureRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     private val _rawValue = MutableStateFlow(BigInteger.ZERO)
     val rawValue: StateFlow<BigInteger> = _rawValue.asStateFlow()
 
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    val isMsbFirst: StateFlow<Boolean> = settingsRepository.isMsbFirst
 
     private val _hex = MutableStateFlow("0x0")
     val hex: StateFlow<String> = _hex.asStateFlow()
@@ -33,6 +35,21 @@ class BitFieldCalcViewModel @Inject constructor(
 
     private val _bin = MutableStateFlow("0b0")
     val bin: StateFlow<String> = _bin.asStateFlow()
+
+    private val _selectedStructure = MutableStateFlow<StructureWithFields?>(null)
+    val selectedStructure: StateFlow<StructureWithFields?> = _selectedStructure.asStateFlow()
+
+    val pinnedStructures: StateFlow<List<StructureWithFields>> = repository.getPinnedStructuresWithFields()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val decodedResults = combine(_rawValue, _selectedStructure) { value, structure ->
+        structure?.fields?.map { field ->
+            val fieldVal = BitCalculator.extractFieldValue(value, field.msb, field.lsb, field.isSigned)
+            val hexVal = "0x" + fieldVal.toString(16).uppercase()
+            val decVal = fieldVal.toString(10)
+            FieldResult(field.fieldName, hexVal, decVal, field.msb, field.lsb)
+        } ?: emptyList()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun updateRawValueFromHex(hexStr: String) {
         val v = BitCalculator.parseStringToBigInteger(hexStr, 16)
@@ -50,17 +67,12 @@ class BitFieldCalcViewModel @Inject constructor(
     }
 
     private fun setRawValue(v: BigInteger) {
-        scope.launch {
+        viewModelScope.launch {
             _rawValue.emit(v)
             _hex.emit("0x" + BitCalculator.toRadixString(v, 16, padTo64 = true))
             _dec.emit(BitCalculator.toRadixString(v, 10))
             _bin.emit("0b" + BitCalculator.toRadixString(v, 2, padTo64 = true))
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        scope.cancel()
     }
 
     fun toggleBit(bitIndex: Int) {
@@ -71,11 +83,25 @@ class BitFieldCalcViewModel @Inject constructor(
     }
 
     fun loadSelectedStructure(structureId: Long) {
-        // TODO: implement applying a structure
+        viewModelScope.launch {
+            val structure = repository.getStructureWithFieldsById(structureId)
+            _selectedStructure.emit(structure)
+        }
+    }
+
+    fun selectStructure(structure: StructureWithFields) {
+        viewModelScope.launch {
+            _selectedStructure.emit(structure)
+        }
     }
 
     fun searchStructures(query: String) = repository.searchStructures(query)
 }
 
-
-
+data class FieldResult(
+    val name: String,
+    val hexValue: String,
+    val decValue: String,
+    val msb: Int,
+    val lsb: Int
+)

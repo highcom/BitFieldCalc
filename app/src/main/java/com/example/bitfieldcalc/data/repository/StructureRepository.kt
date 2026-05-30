@@ -22,6 +22,14 @@ class StructureRepository(
         return structureDao.getAllStructuresWithFields()
     }
 
+    fun getPinnedStructuresWithFields(): Flow<List<StructureWithFields>> {
+        return structureDao.getPinnedStructuresWithFields()
+    }
+
+    suspend fun getStructureWithFieldsById(id: Long): StructureWithFields? {
+        return structureDao.getStructureWithFieldsById(id)
+    }
+
     fun searchStructures(query: String): Flow<List<StructureWithFields>> {
         return structureDao.searchStructuresWithFields(query)
     }

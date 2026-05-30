@@ -17,6 +17,14 @@ interface StructureDao {
     suspend fun deleteById(id: Long): Int
 
     @Transaction
+    @Query("SELECT * FROM structures WHERE id = :id")
+    suspend fun getStructureWithFieldsById(id: Long): StructureWithFields?
+
+    @Transaction
+    @Query("SELECT * FROM structures WHERE is_pinned = 1 ORDER BY sort_order")
+    fun getPinnedStructuresWithFields(): Flow<List<@JvmSuppressWildcards StructureWithFields>>
+
+    @Transaction
     @Query("SELECT * FROM structures ORDER BY sort_order")
     fun getAllStructuresWithFields(): Flow<List<@JvmSuppressWildcards StructureWithFields>>
 

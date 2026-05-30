@@ -18,18 +18,22 @@ import java.math.BigInteger
 @Composable
 fun BitGrid(
     value: BigInteger,
+    isMsbFirst: Boolean,
     onToggle: (Int) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Bits (63..0)", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = if (isMsbFirst) "Bits (63..0)" else "Bits (0..63)",
+            style = MaterialTheme.typography.titleMedium
+        )
         Spacer(modifier = Modifier.height(8.dp))
         
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
-            modifier = Modifier.height(300.dp) // Adjust height as needed
+            modifier = Modifier.height(300.dp)
         ) {
             items(64) { index ->
-                val bitIndex = 63 - index
+                val bitIndex = if (isMsbFirst) 63 - index else index
                 val isSet = value.testBit(bitIndex)
                 
                 BitCell(

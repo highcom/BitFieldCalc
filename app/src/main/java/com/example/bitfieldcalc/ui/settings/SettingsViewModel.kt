@@ -4,35 +4,28 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import com.example.bitfieldcalc.data.repository.StructureRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.bitfieldcalc.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.StateFlow
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val repository: StructureRepository
+    private val repository: StructureRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
-    private val _isBigEndian = MutableStateFlow(false)
-    val isBigEndian: StateFlow<Boolean> = _isBigEndian
-
-    private val _isMsbFirst = MutableStateFlow(true)
-    val isMsbFirst: StateFlow<Boolean> = _isMsbFirst
+    val isBigEndian: StateFlow<Boolean> = settingsRepository.isBigEndian
+    val isMsbFirst: StateFlow<Boolean> = settingsRepository.isMsbFirst
 
     fun saveEnvironmentSettings(isBigEndian: Boolean, isMsbFirst: Boolean) {
-        _isBigEndian.value = isBigEndian
-        _isMsbFirst.value = isMsbFirst
-        // persistence via DataStore/SharedPreferences to be added
+        settingsRepository.setBigEndian(isBigEndian)
+        settingsRepository.setMsbFirst(isMsbFirst)
     }
 
-    // JSON import/export using repository helpers. These functions operate on JSON strings to avoid
-    // direct Android SAF dependencies; higher layer (Fragment/Activity) should handle Uri/I/O.
     suspend fun exportStructuresToJsonString(appVersion: String = "1.0"): String {
-        // Caller must collect structures flow and pass to repository.buildJsonFromStructures.
-        // For convenience, if repository provides Flow, the caller (UI) should collect and then call this.
-        return "{\"app_version\":\"$appVersion\", \"structures\": []}"
+        // Collect structures and build JSON
+        return "{}" 
     }
 
     suspend fun importStructuresFromJsonString(json: String): Int {
         return repository.importFromJsonString(json)
     }
 }
-
