@@ -156,26 +156,20 @@ fun FieldEditItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = field.msb.toString(),
-                    onValueChange = { onUpdate(field.copy(msb = it.toIntOrNull() ?: 0)) },
-                    label = { Text("MSB") },
-                    modifier = Modifier.width(80.dp),
-                    isError = field.msb > maxBitIndex,
-                    supportingText = if (field.msb > maxBitIndex) {
-                        { Text("0〜$maxBitIndex") }
-                    } else null
+                BitIndexInputField(
+                    value = field.msb,
+                    onValueChange = { onUpdate(field.copy(msb = it)) },
+                    label = "MSB",
+                    maxBitIndex = maxBitIndex,
+                    modifier = Modifier.width(80.dp)
                 )
                 Text("〜")
-                OutlinedTextField(
-                    value = field.lsb.toString(),
-                    onValueChange = { onUpdate(field.copy(lsb = it.toIntOrNull() ?: 0)) },
-                    label = { Text("LSB") },
-                    modifier = Modifier.width(80.dp),
-                    isError = field.lsb > maxBitIndex,
-                    supportingText = if (field.lsb > maxBitIndex) {
-                        { Text("0〜$maxBitIndex") }
-                    } else null
+                BitIndexInputField(
+                    value = field.lsb,
+                    onValueChange = { onUpdate(field.copy(lsb = it)) },
+                    label = "LSB",
+                    maxBitIndex = maxBitIndex,
+                    modifier = Modifier.width(80.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
