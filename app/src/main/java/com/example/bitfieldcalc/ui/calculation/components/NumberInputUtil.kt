@@ -1,28 +1,26 @@
 package com.example.bitfieldcalc.ui.calculation.components
 
+import java.math.BigInteger
+
 /**
  * Utility functions for validating/parsing input strings for hex/dec/bin fields.
  */
 object NumberInputUtil {
-    private val HEX_REGEX = Regex("^[0-9A-Fa-f]{0,16}$")
-    private val BIN_REGEX = Regex("^[01]{0,64}$")
-    private val DEC_REGEX = Regex("^[0-9]{0,20}$")
-
-    fun isValidHex(s: String): Boolean {
+    fun isValidHex(s: String, bitLength: Int = 64): Boolean {
         val ss = s.trim().removePrefix("0x").removePrefix("0X")
-        return HEX_REGEX.matches(ss)
+        val maxHexChars = bitLength / 4
+        return ss.length <= maxHexChars && ss.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
     }
 
-    fun isValidBin(s: String): Boolean {
+    fun isValidBin(s: String, bitLength: Int = 64): Boolean {
         val ss = s.trim().removePrefix("0b").removePrefix("0B")
-        return BIN_REGEX.matches(ss)
+        return ss.length <= bitLength && ss.all { it == '0' || it == '1' }
     }
 
-    fun isValidDec(s: String): Boolean {
+    fun isValidDec(s: String, bitLength: Int = 64): Boolean {
         val ss = s.trim()
-        if (!DEC_REGEX.matches(ss)) return false
-        // further numeric range checks could be applied by caller
-        return true
+        val maxDigits = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE).toString(10).length
+        return ss.length <= maxDigits && ss.all { it in '0'..'9' }
     }
 }
 

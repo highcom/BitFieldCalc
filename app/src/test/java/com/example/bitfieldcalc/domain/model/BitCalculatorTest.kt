@@ -9,7 +9,7 @@ class BitCalculatorTest {
     fun parseHexAndFormat() {
         val v = BitCalculator.parseStringToBigInteger("0xFF", 16)
         assertEquals(BigInteger("255"), v)
-        val hex = BitCalculator.toRadixString(v, 16, padTo64 = false)
+        val hex = BitCalculator.toRadixString(v, 16, padTo = 0)
         assertEquals("FF", hex)
     }
 
@@ -30,7 +30,20 @@ class BitCalculatorTest {
     @Test(expected = IllegalArgumentException::class)
     fun extractFieldOutOfRange() {
         val raw = BigInteger.ZERO
-        BitCalculator.extractFieldValue(raw, 64, 0, isSigned = false)
+        BitCalculator.extractFieldValue(raw, 64, 0, isSigned = false, maxBitIndex = 63)
+    }
+
+    @Test
+    fun extractFieldWithin32BitRange() {
+        val raw = BitCalculator.parseStringToBigInteger("0xFFFFFFFF", 16)
+        val extracted = BitCalculator.extractFieldValue(raw, 31, 0, isSigned = false, maxBitIndex = 31)
+        assertEquals(BigInteger("4294967295"), extracted)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun extractFieldOutOf32BitRange() {
+        val raw = BigInteger.ZERO
+        BitCalculator.extractFieldValue(raw, 32, 0, isSigned = false, maxBitIndex = 31)
     }
 
     @Test(expected = IllegalArgumentException::class)

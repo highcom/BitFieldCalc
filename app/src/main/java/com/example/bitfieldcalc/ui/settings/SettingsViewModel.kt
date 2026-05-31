@@ -14,10 +14,12 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
     val isBigEndian: StateFlow<Boolean> = settingsRepository.isBigEndian
     val isMsbFirst: StateFlow<Boolean> = settingsRepository.isMsbFirst
+    val bitLength: StateFlow<Int> = settingsRepository.bitLength
 
-    fun saveEnvironmentSettings(isBigEndian: Boolean, isMsbFirst: Boolean) {
+    fun saveEnvironmentSettings(isBigEndian: Boolean, isMsbFirst: Boolean, bitLength: Int) {
         settingsRepository.setBigEndian(isBigEndian)
         settingsRepository.setMsbFirst(isMsbFirst)
+        settingsRepository.setBitLength(bitLength)
     }
 
     suspend fun exportStructuresToJsonString(appVersion: String = "1.0"): String {

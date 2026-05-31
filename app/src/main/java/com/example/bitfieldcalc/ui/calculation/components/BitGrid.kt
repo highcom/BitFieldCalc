@@ -19,21 +19,23 @@ import java.math.BigInteger
 fun BitGrid(
     value: BigInteger,
     isMsbFirst: Boolean,
+    bitLength: Int,
     onToggle: (Int) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
+        val maxBit = bitLength - 1
         Text(
-            text = if (isMsbFirst) "Bits (63..0)" else "Bits (0..63)",
+            text = if (isMsbFirst) "Bits ($maxBit..0)" else "Bits (0..$maxBit)",
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(8.dp))
         
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
-            modifier = Modifier.height(240.dp)
+            modifier = Modifier.height(if (bitLength > 32) 240.dp else 120.dp)
         ) {
-            items(64) { index ->
-                val bitIndex = if (isMsbFirst) 63 - index else index
+            items(bitLength) { index ->
+                val bitIndex = if (isMsbFirst) (bitLength - 1) - index else index
                 val isSet = value.testBit(bitIndex)
                 
                 BitCell(

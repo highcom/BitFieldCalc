@@ -27,12 +27,13 @@ object BitCalculator {
 
     /**
      * Format a BigInteger into a string of given radix.
-     * If padTo64 is true and radix is 2/16, it will left-pad to 64 bits / 16 hex chars.
+     * If padTo is non-zero and radix is 2/16, it will left-pad to specified bits / corresponding hex chars.
      */
-    fun toRadixString(rawValue: BigInteger, radix: Int, padTo64: Boolean = false): String {
+    fun toRadixString(rawValue: BigInteger, radix: Int, padTo: Int = 0): String {
         val unsigned = if (rawValue.signum() < 0) {
-            // For negative BigInteger, convert to two's complement 64-bit representation
-            rawValue.and(ONE.shiftLeft(64).subtract(ONE))
+            // For negative BigInteger, convert to two's complement representation
+            val bitLen = if (padTo > 0) padTo else 64
+            rawValue.and(ONE.shiftLeft(bitLen).subtract(ONE))
         } else rawValue
 
         val str = when (radix) {
@@ -42,10 +43,10 @@ object BitCalculator {
             else -> unsigned.toString(radix)
         }
 
-        return if (padTo64) {
+        return if (padTo > 0) {
             when (radix) {
-                16 -> str.padStart(16, '0')
-                2 -> str.padStart(64, '0')
+                16 -> str.padStart(padTo / 4, '0')
+                2 -> str.padStart(padTo, '0')
                 else -> str
             }
         } else str
@@ -55,8 +56,14 @@ object BitCalculator {
      * Extract field value from rawValue in range [msb:lsb].
      * If isSigned is true, performs two's complement sign extension.
      */
-    fun extractFieldValue(rawValue: BigInteger, msb: Int, lsb: Int, isSigned: Boolean): BigInteger {
-        require(msb in 0..63 && lsb in 0..63 && msb >= lsb) { "msb/lsb out of range" }
+    fun extractFieldValue(
+        rawValue: BigInteger,
+        msb: Int,
+        lsb: Int,
+        isSigned: Boolean,
+        maxBitIndex: Int = 63
+    ): BigInteger {
+        require(msb in 0..maxBitIndex && lsb in 0..maxBitIndex && msb >= lsb) { "msb/lsb out of range" }
         val width = msb - lsb + 1
         val mask = ONE.shiftLeft(width).subtract(ONE)
         val shifted = rawValue.shiftRight(lsb).and(mask)

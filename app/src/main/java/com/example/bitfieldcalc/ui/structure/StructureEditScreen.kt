@@ -27,6 +27,8 @@ fun StructureEditScreen(
     var tag by remember { mutableStateOf("") }
     var fields by remember { mutableStateOf(listOf<FieldEntity>()) }
     var error by remember { mutableStateOf<String?>(null) }
+    val bitLength by viewModel.bitLength.collectAsState()
+    val maxBitIndex = bitLength - 1
 
     LaunchedEffect(structureId) {
         if (structureId != null) {
@@ -97,6 +99,11 @@ fun StructureEditScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "ビット範囲: 0〜${maxBitIndex}（${bitLength} bit）",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "【フィールド定義リスト】", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 IconButton(onClick = {
@@ -110,6 +117,7 @@ fun StructureEditScreen(
                 itemsIndexed(fields) { index, field ->
                     FieldEditItem(
                         field = field,
+                        maxBitIndex = maxBitIndex,
                         onUpdate = { updated ->
                             fields = fields.toMutableList().apply { set(index, updated) }
                         },
@@ -126,6 +134,7 @@ fun StructureEditScreen(
 @Composable
 fun FieldEditItem(
     field: FieldEntity,
+    maxBitIndex: Int,
     onUpdate: (FieldEntity) -> Unit,
     onDelete: () -> Unit
 ) {
@@ -151,14 +160,22 @@ fun FieldEditItem(
                     value = field.msb.toString(),
                     onValueChange = { onUpdate(field.copy(msb = it.toIntOrNull() ?: 0)) },
                     label = { Text("MSB") },
-                    modifier = Modifier.width(80.dp)
+                    modifier = Modifier.width(80.dp),
+                    isError = field.msb > maxBitIndex,
+                    supportingText = if (field.msb > maxBitIndex) {
+                        { Text("0〜$maxBitIndex") }
+                    } else null
                 )
                 Text("〜")
                 OutlinedTextField(
                     value = field.lsb.toString(),
                     onValueChange = { onUpdate(field.copy(lsb = it.toIntOrNull() ?: 0)) },
                     label = { Text("LSB") },
-                    modifier = Modifier.width(80.dp)
+                    modifier = Modifier.width(80.dp),
+                    isError = field.lsb > maxBitIndex,
+                    supportingText = if (field.lsb > maxBitIndex) {
+                        { Text("0〜$maxBitIndex") }
+                    } else null
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {

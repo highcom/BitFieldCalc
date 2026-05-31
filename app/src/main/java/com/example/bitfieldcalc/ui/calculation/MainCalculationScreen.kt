@@ -32,6 +32,7 @@ fun MainCalculationScreen(
     val selectedStructure by viewModel.selectedStructure.collectAsState()
     val decodedResults by viewModel.decodedResults.collectAsState()
     val isMsbFirst by viewModel.isMsbFirst.collectAsState()
+    val bitLength by viewModel.bitLength.collectAsState()
 
     var showSelector by remember { mutableStateOf(false) }
 
@@ -100,6 +101,7 @@ fun MainCalculationScreen(
                 BitGrid(
                     value = rawValue,
                     isMsbFirst = isMsbFirst,
+                    bitLength = bitLength,
                     onToggle = { idx -> viewModel.toggleBit(idx) }
                 )
 
@@ -109,6 +111,7 @@ fun MainCalculationScreen(
                     hex = hex,
                     dec = dec,
                     bin = bin,
+                    bitLength = bitLength,
                     onHexChanged = { viewModel.updateRawValueFromHex(it) },
                     onDecChanged = { viewModel.updateRawValueFromDec(it) },
                     onBinChanged = { viewModel.updateRawValueFromBin(it) }

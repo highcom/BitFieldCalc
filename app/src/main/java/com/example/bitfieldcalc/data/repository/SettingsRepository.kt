@@ -20,6 +20,9 @@ class SettingsRepository @Inject constructor(
     private val _isMsbFirst = MutableStateFlow(prefs.getBoolean("is_msb_first", true))
     val isMsbFirst: StateFlow<Boolean> = _isMsbFirst
 
+    private val _bitLength = MutableStateFlow(prefs.getInt("bit_length", 64))
+    val bitLength: StateFlow<Int> = _bitLength
+
     fun setBigEndian(value: Boolean) {
         prefs.edit().putBoolean("is_big_endian", value).apply()
         _isBigEndian.value = value
@@ -28,5 +31,11 @@ class SettingsRepository @Inject constructor(
     fun setMsbFirst(value: Boolean) {
         prefs.edit().putBoolean("is_msb_first", value).apply()
         _isMsbFirst.value = value
+    }
+
+    fun setBitLength(value: Int) {
+        require(value == 32 || value == 64) { "bit length must be 32 or 64" }
+        prefs.edit().putInt("bit_length", value).apply()
+        _bitLength.value = value
     }
 }

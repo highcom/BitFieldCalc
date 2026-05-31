@@ -16,30 +16,31 @@ fun NumberInputFields(
     hex: String,
     dec: String,
     bin: String,
+    bitLength: Int,
     onHexChanged: (String) -> Unit,
     onDecChanged: (String) -> Unit,
     onBinChanged: (String) -> Unit
 ) {
-    val max64 = BigInteger("18446744073709551615")
-    val isDecOverflow = try { BigInteger(dec) > max64 } catch (e: Exception) { false }
+    val maxValue = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE)
+    val isDecOverflow = try { BigInteger(dec) > maxValue } catch (e: Exception) { false }
 
     Column(modifier = Modifier.padding(16.dp)) {
         OutlinedTextField(
             value = hex,
-            onValueChange = { if (NumberInputUtil.isValidHex(it)) onHexChanged(it) },
+            onValueChange = { if (NumberInputUtil.isValidHex(it, bitLength)) onHexChanged(it) },
             label = { Text("HEX") },
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
             value = dec,
-            onValueChange = { if (NumberInputUtil.isValidDec(it)) onDecChanged(it) },
+            onValueChange = { if (NumberInputUtil.isValidDec(it, bitLength)) onDecChanged(it) },
             label = { Text("DEC") },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             isError = isDecOverflow,
             supportingText = {
                 if (isDecOverflow) {
                     Text(
-                        text = "64bitの上限値を超えています",
+                        text = "${bitLength}bitの上限値を超えています",
                         color = MaterialTheme.colorScheme.error
                     )
                 }
@@ -47,7 +48,7 @@ fun NumberInputFields(
         )
         OutlinedTextField(
             value = bin,
-            onValueChange = { if (NumberInputUtil.isValidBin(it)) onBinChanged(it) },
+            onValueChange = { if (NumberInputUtil.isValidBin(it, bitLength)) onBinChanged(it) },
             label = { Text("BIN") },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )

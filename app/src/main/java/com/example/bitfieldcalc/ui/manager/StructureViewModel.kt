@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.bitfieldcalc.data.db.entity.FieldEntity
 import com.example.bitfieldcalc.data.db.entity.StructureEntity
 import com.example.bitfieldcalc.data.db.entity.StructureWithFields
+import com.example.bitfieldcalc.data.repository.SettingsRepository
 import com.example.bitfieldcalc.data.repository.StructureRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -17,8 +18,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StructureViewModel @Inject constructor(
-    private val repository: StructureRepository
+    private val repository: StructureRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
+    val bitLength: StateFlow<Int> = settingsRepository.bitLength
     private var pendingDeleteJob: Job? = null
     private var pendingDeletedId: Long? = null
 
@@ -47,10 +50,13 @@ class StructureViewModel @Inject constructor(
     ): Pair<Boolean, String?> {
         if (structureName.isBlank()) return false to "構造体名を入力してください"
 
+        val maxBitIndex = bitLength.value - 1
         val ranges = mutableListOf<Pair<IntRange, String>>()
         for (f in fields) {
             if (f.fieldName.isBlank()) return false to "フィールド名を入力してください"
-            if (f.msb < 0 || f.msb > 63 || f.lsb < 0 || f.lsb > 63) return false to "ビット範囲は0〜63の間である必要があります (${f.fieldName})"
+            if (f.msb < 0 || f.msb > maxBitIndex || f.lsb < 0 || f.lsb > maxBitIndex) {
+                return false to "ビット範囲は0〜${maxBitIndex}の間である必要があります (${f.fieldName})"
+            }
             if (f.msb < f.lsb) return false to "MSBはLSB以上である必要があります (${f.fieldName})"
             ranges.add((f.lsb..f.msb) to f.fieldName)
         }

@@ -17,6 +17,7 @@ fun SettingsScreen(
 ) {
     val isBigEndian by viewModel.isBigEndian.collectAsState()
     val isMsbFirst by viewModel.isMsbFirst.collectAsState()
+    val bitLength by viewModel.bitLength.collectAsState()
 
     Scaffold(
         topBar = {
@@ -38,7 +39,7 @@ fun SettingsScreen(
                 Text(text = "エンディアン (Big Endian)", modifier = Modifier.weight(1f))
                 Switch(
                     checked = isBigEndian,
-                    onCheckedChange = { viewModel.saveEnvironmentSettings(it, isMsbFirst) }
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(it, isMsbFirst, bitLength) }
                 )
             }
 
@@ -49,8 +50,28 @@ fun SettingsScreen(
                 Text(text = "ビットオーダー (MSB First)", modifier = Modifier.weight(1f))
                 Switch(
                     checked = isMsbFirst,
-                    onCheckedChange = { viewModel.saveEnvironmentSettings(isBigEndian, it) }
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(isBigEndian, it, bitLength) }
                 )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "ビット幅", modifier = Modifier.weight(1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = bitLength == 32,
+                        onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 32) }
+                    )
+                    Text("32 bit")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RadioButton(
+                        selected = bitLength == 64,
+                        onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 64) }
+                    )
+                    Text("64 bit")
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
