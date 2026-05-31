@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
+}
+
+val admobProperties = Properties().apply {
+    val admobFile = rootProject.file("admob.properties")
+    if (admobFile.exists()) {
+        load(admobFile.inputStream())
+    }
 }
 
 android {
@@ -18,6 +27,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["admobAppId"] = admobProperties.getProperty("admob.app_id") ?: ""
+        resValue("string", "admob_banner_unit_id", admobProperties.getProperty("admob.banner_unit_id") ?: "")
     }
 
     buildTypes {
@@ -38,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = true
     }
 }
 
@@ -54,6 +67,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.play.services.ads)
 
     // Hilt
     implementation(libs.dagger.hilt.android)

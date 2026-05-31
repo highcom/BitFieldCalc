@@ -5,13 +5,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.example.bitfieldcalc.R
 import com.example.bitfieldcalc.ui.calculation.BitFieldCalcViewModel
 import com.example.bitfieldcalc.ui.calculation.MainCalculationScreen
 import com.example.bitfieldcalc.ui.manager.StructureViewModel
@@ -19,6 +28,10 @@ import com.example.bitfieldcalc.ui.settings.SettingsScreen
 import com.example.bitfieldcalc.ui.settings.SettingsViewModel
 import com.example.bitfieldcalc.ui.structure.StructureEditScreen
 import com.example.bitfieldcalc.ui.structure.StructureManagerScreen
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 
 sealed interface Screen {
@@ -37,9 +50,34 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        MobileAds.initialize(this) {}
         setContent {
             AppRoot(vm = vm, structureVm = structureVm, settingsVm = settingsVm)
         }
+    }
+}
+
+@Composable
+fun AdBanner() {
+    val adUnitId = stringResource(id = R.string.admob_banner_unit_id)
+    // 広告が表示されない問題を解決するため、明示的に高さを指定し、背景を持たせたコンテナでラップします。
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding() // ナビゲーションバーと重ならないように
+    ) {
+        AndroidView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            factory = { context ->
+                AdView(context).apply {
+                    setAdSize(AdSize.BANNER)
+                    this.adUnitId = adUnitId
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
     }
 }
 
@@ -51,28 +89,33 @@ fun AppRoot(vm: BitFieldCalcViewModel, structureVm: StructureViewModel, settings
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        when (val s = screenState.value) {
-            is Screen.Main -> MainCalculationScreen(
-                viewModel = vm,
-                onNavigateToSettings = { screenState.value = Screen.Settings },
-                onNavigateToManager = { screenState.value = Screen.Manager }
-            )
-            is Screen.Manager -> StructureManagerScreen(
-                viewModel = structureVm,
-                onBack = { screenState.value = Screen.Main },
-                onAdd = { screenState.value = Screen.Edit(null) },
-                onEdit = { id -> screenState.value = Screen.Edit(id) }
-            )
-            is Screen.Edit -> StructureEditScreen(
-                viewModel = structureVm,
-                structureId = s.structureId,
-                onDone = { screenState.value = Screen.Manager },
-                onCancel = { screenState.value = Screen.Manager }
-            )
-            is Screen.Settings -> SettingsScreen(
-                viewModel = settingsVm,
-                onBack = { screenState.value = Screen.Main }
-            )
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f)) {
+                when (val s = screenState.value) {
+                    is Screen.Main -> MainCalculationScreen(
+                        viewModel = vm,
+                        onNavigateToSettings = { screenState.value = Screen.Settings },
+                        onNavigateToManager = { screenState.value = Screen.Manager }
+                    )
+                    is Screen.Manager -> StructureManagerScreen(
+                        viewModel = structureVm,
+                        onBack = { screenState.value = Screen.Main },
+                        onAdd = { screenState.value = Screen.Edit(null) },
+                        onEdit = { id -> screenState.value = Screen.Edit(id) }
+                    )
+                    is Screen.Edit -> StructureEditScreen(
+                        viewModel = structureVm,
+                        structureId = s.structureId,
+                        onDone = { screenState.value = Screen.Manager },
+                        onCancel = { screenState.value = Screen.Manager }
+                    )
+                    is Screen.Settings -> SettingsScreen(
+                        viewModel = settingsVm,
+                        onBack = { screenState.value = Screen.Main }
+                    )
+                }
+            }
+            AdBanner()
         }
     }
 }
