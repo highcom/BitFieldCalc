@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,17 +23,25 @@ fun NumberInputFields(
     val maxValue = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE)
     val isDecOverflow = try { BigInteger(dec) > maxValue } catch (e: Exception) { false }
 
+    val hexDigits = FixedWidthInputLogic.stripPrefix(hex, "0x")
+    val decDigits = FixedWidthInputLogic.normalizeDigits(dec, NumberInputUtil.maxDecDigits(bitLength))
+    val binDigits = FixedWidthInputLogic.stripPrefix(bin, "0b")
+
     Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = hex,
-            onValueChange = { if (NumberInputUtil.isValidHex(it, bitLength)) onHexChanged(it) },
-            label = { Text("HEX") },
+        BlockCursorDigitField(
+            label = "HEX",
+            prefix = "0x",
+            digits = hexDigits,
+            onDigitsChange = { onHexChanged(FixedWidthInputLogic.withPrefix(it, "0x")) },
+            isCharValid = { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
-            value = dec,
-            onValueChange = { if (NumberInputUtil.isValidDec(it, bitLength)) onDecChanged(it) },
-            label = { Text("DEC") },
+        BlockCursorDigitField(
+            label = "DEC",
+            prefix = "",
+            digits = decDigits,
+            onDigitsChange = onDecChanged,
+            isCharValid = { it in '0'..'9' },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             isError = isDecOverflow,
             supportingText = {
@@ -46,10 +53,12 @@ fun NumberInputFields(
                 }
             }
         )
-        OutlinedTextField(
-            value = bin,
-            onValueChange = { if (NumberInputUtil.isValidBin(it, bitLength)) onBinChanged(it) },
-            label = { Text("BIN") },
+        BlockCursorDigitField(
+            label = "BIN",
+            prefix = "0b",
+            digits = binDigits,
+            onDigitsChange = { onBinChanged(FixedWidthInputLogic.withPrefix(it, "0b")) },
+            isCharValid = { it == '0' || it == '1' },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
     }

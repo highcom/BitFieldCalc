@@ -6,6 +6,9 @@ import java.math.BigInteger
  * Utility functions for validating/parsing input strings for hex/dec/bin fields.
  */
 object NumberInputUtil {
+    fun maxDecDigits(bitLength: Int = 64): Int =
+        BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE).toString(10).length
+
     fun isValidHex(s: String, bitLength: Int = 64): Boolean {
         val ss = s.trim().removePrefix("0x").removePrefix("0X")
         val maxHexChars = bitLength / 4
@@ -19,7 +22,7 @@ object NumberInputUtil {
 
     fun isValidDec(s: String, bitLength: Int = 64): Boolean {
         val ss = s.trim()
-        val maxDigits = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE).toString(10).length
+        val maxDigits = maxDecDigits(bitLength)
         return ss.length <= maxDigits && ss.all { it in '0'..'9' }
     }
 }

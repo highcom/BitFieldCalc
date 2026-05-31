@@ -6,6 +6,7 @@ import com.example.bitfieldcalc.data.db.entity.StructureWithFields
 import com.example.bitfieldcalc.data.repository.StructureRepository
 import com.example.bitfieldcalc.data.repository.SettingsRepository
 import com.example.bitfieldcalc.domain.model.BitCalculator
+import com.example.bitfieldcalc.ui.calculation.components.NumberInputUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +32,7 @@ class BitFieldCalcViewModel @Inject constructor(
     private val _hex = MutableStateFlow("0x" + "0".repeat(bitLength.value / 4))
     val hex: StateFlow<String> = _hex.asStateFlow()
 
-    private val _dec = MutableStateFlow("0")
+    private val _dec = MutableStateFlow("0".padStart(NumberInputUtil.maxDecDigits(bitLength.value), '0'))
     val dec: StateFlow<String> = _dec.asStateFlow()
 
     private val _bin = MutableStateFlow("0b" + "0".repeat(bitLength.value))
@@ -94,7 +95,12 @@ class BitFieldCalcViewModel @Inject constructor(
         viewModelScope.launch {
             _rawValue.emit(maskedValue)
             _hex.emit("0x" + BitCalculator.toRadixString(maskedValue, 16, padTo = currentBitLength))
-            _dec.emit(BitCalculator.toRadixString(maskedValue, 10))
+            _dec.emit(
+                BitCalculator.toRadixString(maskedValue, 10).padStart(
+                    NumberInputUtil.maxDecDigits(currentBitLength),
+                    '0'
+                )
+            )
             _bin.emit("0b" + BitCalculator.toRadixString(maskedValue, 2, padTo = currentBitLength))
         }
     }
