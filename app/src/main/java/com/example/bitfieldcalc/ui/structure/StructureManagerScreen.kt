@@ -133,7 +133,7 @@ fun StructureListItem(
                     Text(text = item.structure.name, style = MaterialTheme.typography.titleMedium)
                 }
                 Text(
-                    text = "${item.fields.size} fields" + (item.structure.tag?.let { " [$it]" } ?: ""),
+                    text = "${item.structure.bitWidth}bit, ${item.fields.size} fields" + (item.structure.tag?.let { " [$it]" } ?: ""),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

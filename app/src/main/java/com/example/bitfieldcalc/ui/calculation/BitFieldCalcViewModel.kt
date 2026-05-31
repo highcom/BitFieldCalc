@@ -53,7 +53,8 @@ class BitFieldCalcViewModel @Inject constructor(
     }
 
     val decodedResults = combine(_rawValue, _selectedStructure, bitLength) { value, structure, currentBitLength ->
-        val maxBitIndex = currentBitLength - 1
+        val effectiveBitWidth = structure?.structure?.bitWidth ?: currentBitLength
+        val maxBitIndex = effectiveBitWidth - 1
         structure?.fields?.map { field ->
             try {
                 val fieldVal = BitCalculator.extractFieldValue(
@@ -116,13 +117,17 @@ class BitFieldCalcViewModel @Inject constructor(
     fun loadSelectedStructure(structureId: Long) {
         viewModelScope.launch {
             val structure = repository.getStructureWithFieldsById(structureId)
-            _selectedStructure.emit(structure)
+            structure?.let {
+                _selectedStructure.emit(it)
+                settingsRepository.setBitLength(it.structure.bitWidth)
+            }
         }
     }
 
     fun selectStructure(structure: StructureWithFields) {
         viewModelScope.launch {
             _selectedStructure.emit(structure)
+            settingsRepository.setBitLength(structure.structure.bitWidth)
         }
     }
 

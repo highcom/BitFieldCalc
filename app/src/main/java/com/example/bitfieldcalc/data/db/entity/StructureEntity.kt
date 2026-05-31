@@ -19,6 +19,9 @@ data class StructureEntity(
     @ColumnInfo(name = "is_pinned")
     val isPinned: Boolean = false,
 
+    @ColumnInfo(name = "bit_width")
+    val bitWidth: Int = 32,
+
     @ColumnInfo(name = "sort_order")
     val sortOrder: Int = 0
 )

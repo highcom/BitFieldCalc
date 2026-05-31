@@ -69,6 +69,7 @@ class StructureRepository(
             obj.put("name", s.structure.name)
             if (s.structure.tag != null) obj.put("tag", s.structure.tag)
             obj.put("is_pinned", s.structure.isPinned)
+            obj.put("bit_width", s.structure.bitWidth)
             val fieldsArr = JSONArray()
             for (f in s.fields) {
                 val fo = JSONObject()
@@ -101,8 +102,9 @@ class StructureRepository(
             if (name.isEmpty()) continue
             val tag = if (s.has("tag")) s.optString("tag") else null
             val isPinned = s.optBoolean("is_pinned", false)
+            val bitWidth = s.optInt("bit_width", 32)
             val fieldsArr = s.optJSONArray("fields") ?: JSONArray()
-            val structureEntity = StructureEntity(name = name, tag = tag, isPinned = isPinned)
+            val structureEntity = StructureEntity(name = name, tag = tag, isPinned = isPinned, bitWidth = bitWidth)
             val fields = mutableListOf<FieldEntity>()
             for (j in 0 until fieldsArr.length()) {
                 val f = fieldsArr.getJSONObject(j)

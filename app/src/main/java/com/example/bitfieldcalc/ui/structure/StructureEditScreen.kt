@@ -37,8 +37,9 @@ fun StructureEditScreen(
 
     var fields by remember { mutableStateOf(listOf<FieldEntity>()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val bitLength by viewModel.bitLength.collectAsState()
-    val maxBitIndex = bitLength - 1
+    var selectedBitWidth by remember { mutableIntStateOf(32) }
+    val globalBitLength by viewModel.bitLength.collectAsState()
+    val maxBitIndex = selectedBitWidth - 1
 
     LaunchedEffect(structureId) {
         if (structureId != null) {
@@ -47,7 +48,10 @@ fun StructureEditScreen(
                 name = s.structure.name
                 tag = s.structure.tag ?: ""
                 fields = s.fields
+                selectedBitWidth = s.structure.bitWidth
             }
+        } else {
+            selectedBitWidth = globalBitLength
         }
     }
 
@@ -66,6 +70,7 @@ fun StructureEditScreen(
                             id = structureId ?: 0L,
                             structureName = name,
                             tag = tag.ifBlank { null },
+                            bitWidth = selectedBitWidth,
                             fields = fields
                         )
                         if (success) {
@@ -142,8 +147,24 @@ fun StructureEditScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+            
+            Text("ビット幅", style = MaterialTheme.typography.labelLarge)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(8, 16, 32, 64).forEach { width ->
+                    FilterChip(
+                        selected = selectedBitWidth == width,
+                        onClick = { selectedBitWidth = width },
+                        label = { Text("${width}bit") }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "ビット範囲: 0〜${maxBitIndex}（${bitLength} bit）",
+                text = "ビット範囲: 0〜${maxBitIndex}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

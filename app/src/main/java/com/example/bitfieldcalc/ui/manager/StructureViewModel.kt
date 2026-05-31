@@ -46,11 +46,12 @@ class StructureViewModel @Inject constructor(
         id: Long,
         structureName: String,
         tag: String?,
+        bitWidth: Int,
         fields: List<FieldEntity>
     ): Pair<Boolean, String?> {
         if (structureName.isBlank()) return false to "構造体名を入力してください"
 
-        val maxBitIndex = bitLength.value - 1
+        val maxBitIndex = bitWidth - 1
         val ranges = mutableListOf<Pair<IntRange, String>>()
         for (f in fields) {
             if (f.fieldName.isBlank()) return false to "フィールド名を入力してください"
@@ -70,7 +71,7 @@ class StructureViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val entity = StructureEntity(id = id, name = structureName, tag = tag)
+            val entity = StructureEntity(id = id, name = structureName, tag = tag, bitWidth = bitWidth)
             repository.insertStructureWithFields(entity, fields)
         }
         return true to null

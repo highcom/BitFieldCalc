@@ -34,7 +34,7 @@ class SettingsRepository @Inject constructor(
     }
 
     fun setBitLength(value: Int) {
-        require(value == 32 || value == 64) { "bit length must be 32 or 64" }
+        require(value == 8 || value == 16 || value == 32 || value == 64) { "bit length must be 8, 16, 32 or 64" }
         prefs.edit().putInt("bit_length", value).apply()
         _bitLength.value = value
     }
