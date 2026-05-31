@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +26,15 @@ fun StructureEditScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var tag by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+    val allTags = remember(uiState.structures) {
+        uiState.structures.mapNotNull { it.structure.tag }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .sorted()
+    }
+
     var fields by remember { mutableStateOf(listOf<FieldEntity>()) }
     var error by remember { mutableStateOf<String?>(null) }
     val bitLength by viewModel.bitLength.collectAsState()
@@ -91,12 +101,45 @@ fun StructureEditScreen(
                 label = { Text("構造体名") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = tag,
-                onValueChange = { tag = it },
-                label = { Text("タグ名") },
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            )
+            ) {
+                OutlinedTextField(
+                    value = tag,
+                    onValueChange = {
+                        tag = it
+                        expanded = true
+                    },
+                    label = { Text("タグ名") },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable, true),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                )
+
+                val filteredTags = allTags.filter { it.contains(tag, ignoreCase = true) }
+                if (filteredTags.isNotEmpty()) {
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        filteredTags.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption) },
+                                onClick = {
+                                    tag = selectionOption
+                                    expanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Text(
