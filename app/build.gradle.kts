@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 val admobProperties = Properties().apply {
@@ -61,6 +63,7 @@ hilt {
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.firebase.crashlytics)
     implementation(libs.material)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.activity.ktx)
