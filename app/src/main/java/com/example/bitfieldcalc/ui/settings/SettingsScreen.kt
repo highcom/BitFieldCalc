@@ -59,18 +59,33 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "ビット幅", modifier = Modifier.weight(1f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = bitLength == 32,
-                        onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 32) }
-                    )
-                    Text("32 bit")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    RadioButton(
-                        selected = bitLength == 64,
-                        onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 64) }
-                    )
-                    Text("64 bit")
+                Column(horizontalAlignment = Alignment.Start) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = bitLength == 8,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 8) }
+                        )
+                        Text("8 bit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        RadioButton(
+                            selected = bitLength == 16,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 16) }
+                        )
+                        Text("16 bit")
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = bitLength == 32,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 32) }
+                        )
+                        Text("32 bit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        RadioButton(
+                            selected = bitLength == 64,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 64) }
+                        )
+                        Text("64 bit")
+                    }
                 }
             }
 

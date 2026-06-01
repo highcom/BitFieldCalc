@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BitFieldCalcViewModel @Inject constructor(
     private val repository: StructureRepository,
-    private val settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
     private val _rawValue = MutableStateFlow(BigInteger.ZERO)
     val rawValue: StateFlow<BigInteger> = _rawValue.asStateFlow()
@@ -53,7 +53,7 @@ class BitFieldCalcViewModel @Inject constructor(
     }
 
     val decodedResults = combine(_rawValue, _selectedStructure, bitLength) { value, structure, currentBitLength ->
-        val effectiveBitWidth = structure?.structure?.bitWidth ?: currentBitLength
+        val effectiveBitWidth = currentBitLength
         val maxBitIndex = effectiveBitWidth - 1
         structure?.fields?.map { field ->
             try {
@@ -119,7 +119,6 @@ class BitFieldCalcViewModel @Inject constructor(
             val structure = repository.getStructureWithFieldsById(structureId)
             structure?.let {
                 _selectedStructure.emit(it)
-                settingsRepository.setBitLength(it.structure.bitWidth)
             }
         }
     }
@@ -127,7 +126,6 @@ class BitFieldCalcViewModel @Inject constructor(
     fun selectStructure(structure: StructureWithFields) {
         viewModelScope.launch {
             _selectedStructure.emit(structure)
-            settingsRepository.setBitLength(structure.structure.bitWidth)
         }
     }
 
