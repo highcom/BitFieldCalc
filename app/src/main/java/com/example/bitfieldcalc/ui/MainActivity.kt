@@ -28,9 +28,11 @@ import com.example.bitfieldcalc.ui.settings.SettingsScreen
 import com.example.bitfieldcalc.ui.settings.SettingsViewModel
 import com.example.bitfieldcalc.ui.structure.StructureEditScreen
 import com.example.bitfieldcalc.ui.structure.StructureManagerScreen
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -60,21 +62,33 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AdBanner() {
     val adUnitId = stringResource(id = R.string.admob_banner_unit_id)
-    // 広告が表示されない問題を解決するため、明示的に高さを指定し、背景を持たせたコンテナでラップします。
+    val isAdLoaded = remember { mutableStateOf(false) }
+
+    // 広告がロードされた場合のみ領域を確保し、表示する
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .height(if (isAdLoaded.value) 50.dp else 0.dp)
     ) {
         AndroidView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
+            modifier = Modifier.fillMaxWidth(),
             factory = { context ->
                 AdView(context).apply {
                     setAdSize(AdSize.BANNER)
                     this.adUnitId = adUnitId
+                    adListener = object : AdListener() {
+                        override fun onAdLoaded() {
+                            isAdLoaded.value = true
+                        }
+                        override fun onAdFailedToLoad(error: LoadAdError) {
+                            isAdLoaded.value = false
+                        }
+                    }
                     loadAd(AdRequest.Builder().build())
                 }
+            },
+            onRelease = { adView ->
+                adView.destroy()
             }
         )
     }
