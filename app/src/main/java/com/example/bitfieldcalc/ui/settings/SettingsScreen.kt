@@ -89,22 +89,6 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(text = "データ管理", style = MaterialTheme.typography.titleMedium)
-            
-            Button(
-                onClick = { /* TODO: Implement Export */ },
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-            ) {
-                Text("構造体データをエクスポート (JSON)")
-            }
-
-            Button(
-                onClick = { /* TODO: Implement Import */ },
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) {
-                Text("構造体データをインポート (JSON)")
-            }
         }
     }
 }
