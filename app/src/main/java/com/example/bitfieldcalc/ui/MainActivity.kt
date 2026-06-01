@@ -64,7 +64,6 @@ fun AdBanner() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding() // ナビゲーションバーと重ならないように
     ) {
         AndroidView(
             modifier = Modifier
@@ -89,7 +88,7 @@ fun AppRoot(vm: BitFieldCalcViewModel, structureVm: StructureViewModel, settings
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
             Box(modifier = Modifier.weight(1f)) {
                 when (val s = screenState.value) {
                     is Screen.Main -> MainCalculationScreen(
