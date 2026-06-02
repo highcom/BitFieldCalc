@@ -18,15 +18,15 @@ val admobProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.example.bitfieldcalc"
+    namespace = "com.highcom.bitfieldcalc"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.bitfieldcalc"
+        applicationId = "com.highcom.bitfieldcalc"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

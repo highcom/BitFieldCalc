@@ -1,0 +1,94 @@
+package com.highcom.bitfieldcalc.ui.settings
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onBack: () -> Unit
+) {
+    val isBigEndian by viewModel.isBigEndian.collectAsState()
+    val isMsbFirst by viewModel.isMsbFirst.collectAsState()
+    val bitLength by viewModel.bitLength.collectAsState()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("グローバル設定") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "エンディアン (Big Endian)", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = isBigEndian,
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(it, isMsbFirst, bitLength) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "ビットオーダー (MSB First)", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = isMsbFirst,
+                    onCheckedChange = { viewModel.saveEnvironmentSettings(isBigEndian, it, bitLength) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "ビット幅", modifier = Modifier.weight(1f))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = bitLength == 8,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 8) }
+                        )
+                        Text("8 bit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        RadioButton(
+                            selected = bitLength == 16,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 16) }
+                        )
+                        Text("16 bit")
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = bitLength == 32,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 32) }
+                        )
+                        Text("32 bit")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        RadioButton(
+                            selected = bitLength == 64,
+                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 64) }
+                        )
+                        Text("64 bit")
+                    }
+                }
+            }
+
+        }
+    }
+}
