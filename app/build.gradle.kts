@@ -17,6 +17,10 @@ val admobProperties = Properties().apply {
     }
 }
 
+base {
+    archivesName.set("bitfieldcalc")
+}
+
 android {
     namespace = "com.highcom.bitfieldcalc"
     compileSdk = 35
