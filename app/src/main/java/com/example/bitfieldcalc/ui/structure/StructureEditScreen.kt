@@ -171,7 +171,15 @@ fun StructureEditScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "【フィールド定義リスト】", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 IconButton(onClick = {
-                    fields = fields + FieldEntity(structureId = structureId ?: 0L, fieldName = "", msb = 0, lsb = 0)
+                    val lastField = fields.lastOrNull()
+                    val nextMsb = if (lastField != null) lastField.lsb - 1 else maxBitIndex
+                    val safeMsb = nextMsb.coerceAtLeast(0)
+                    fields = fields + FieldEntity(
+                        structureId = structureId ?: 0L,
+                        fieldName = "",
+                        msb = safeMsb,
+                        lsb = safeMsb
+                    )
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Field")
                 }
@@ -181,6 +189,7 @@ fun StructureEditScreen(
                 itemsIndexed(fields) { index, field ->
                     FieldEditItem(
                         field = field,
+                        previousField = if (index > 0) fields[index - 1] else null,
                         maxBitIndex = maxBitIndex,
                         onUpdate = { updated ->
                             fields = fields.toMutableList().apply { set(index, updated) }
@@ -198,10 +207,13 @@ fun StructureEditScreen(
 @Composable
 fun FieldEditItem(
     field: FieldEntity,
+    previousField: FieldEntity?,
     maxBitIndex: Int,
     onUpdate: (FieldEntity) -> Unit,
     onDelete: () -> Unit
 ) {
+    val bitSize = if (field.msb >= field.lsb) field.msb - field.lsb + 1 else 0
+
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +237,7 @@ fun FieldEditItem(
                     onValueChange = { onUpdate(field.copy(msb = it)) },
                     label = "MSB",
                     maxBitIndex = maxBitIndex,
-                    modifier = Modifier.width(80.dp)
+                    modifier = Modifier.width(70.dp)
                 )
                 Text("〜")
                 BitIndexInputField(
@@ -233,16 +245,22 @@ fun FieldEditItem(
                     onValueChange = { onUpdate(field.copy(lsb = it)) },
                     label = "LSB",
                     maxBitIndex = maxBitIndex,
+                    modifier = Modifier.width(70.dp)
+                )
+
+                BitSizeInputField(
+                    value = bitSize,
+                    onValueChange = { newSize ->
+                        if (newSize > 0) {
+                            val nextMsb = previousField?.let { it.lsb - 1 } ?: maxBitIndex
+                            val newMsb = nextMsb.coerceIn(0, maxBitIndex)
+                            val newLsb = (newMsb - (newSize - 1)).coerceIn(0, maxBitIndex)
+                            onUpdate(field.copy(msb = newMsb, lsb = newLsb))
+                        }
+                    },
+                    maxSize = maxBitIndex + 1,
                     modifier = Modifier.width(80.dp)
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = field.isSigned,
-                        onCheckedChange = { onUpdate(field.copy(isSigned = it)) }
-                    )
-                    Text("Signed")
-                }
             }
         }
     }
