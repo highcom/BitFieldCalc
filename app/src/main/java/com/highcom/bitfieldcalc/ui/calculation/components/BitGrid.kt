@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigInteger
@@ -23,6 +24,13 @@ fun BitGrid(
     bitLength: Int,
     onToggle: (Int) -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val gridPadding = 16.dp * 2
+    val cellWidth = (screenWidth - gridPadding) / 8
+    val rowCount = (bitLength + 7) / 8
+    val gridHeight = cellWidth * rowCount
+
     Column(modifier = Modifier.padding(16.dp)) {
         val maxBit = bitLength - 1
         Text(
@@ -33,7 +41,8 @@ fun BitGrid(
         
         LazyVerticalGrid(
             columns = GridCells.Fixed(8),
-            modifier = Modifier.height(if (bitLength > 32) 240.dp else 120.dp)
+            modifier = Modifier.height(gridHeight),
+            userScrollEnabled = false
         ) {
             items(bitLength) { index ->
                 val bitIndex = if (isMsbFirst) (bitLength - 1) - index else index
