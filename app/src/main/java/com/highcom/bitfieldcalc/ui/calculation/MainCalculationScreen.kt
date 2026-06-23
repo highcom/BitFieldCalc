@@ -11,8 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
@@ -96,13 +98,13 @@ fun MainCalculationContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("BitField Calc") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                     }
                     IconButton(onClick = onNavigateToManager) {
-                        Icon(Icons.Default.List, contentDescription = "Manager")
+                        Icon(Icons.Default.List, contentDescription = stringResource(R.string.manager))
                     }
                 }
             )
@@ -145,7 +147,10 @@ fun MainCalculationContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "現在の構造体: ▼ ${selectedStructure?.structure?.name ?: "選択されていません"}",
+                            text = stringResource(
+                                R.string.current_structure,
+                                selectedStructure?.structure?.name ?: stringResource(R.string.structure_not_selected)
+                            ),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f)
                         )

@@ -7,8 +7,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import com.highcom.bitfieldcalc.R
 
 @Composable
 fun BitSizeInputField(
@@ -51,7 +53,7 @@ fun BitSizeInputField(
         singleLine = true,
         isError = value > maxSize || (value == 0 && text.isNotEmpty()),
         supportingText = if (value > maxSize) {
-            { Text("1〜$maxSize") }
+            { Text(stringResource(R.string.range_1_to_n, maxSize)) }
         } else {
             null
         }

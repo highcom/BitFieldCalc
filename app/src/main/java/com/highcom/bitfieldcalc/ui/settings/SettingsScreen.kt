@@ -7,8 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 
 @Composable
 fun SettingsScreen(
@@ -40,10 +42,10 @@ fun SettingsContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("グローバル設定") },
+                title = { Text(stringResource(R.string.global_settings)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -54,7 +56,7 @@ fun SettingsContent(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "エンディアン (Big Endian)", modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.endian_big), modifier = Modifier.weight(1f))
                 Switch(
                     checked = isBigEndian,
                     onCheckedChange = { onSaveSettings(it, isMsbFirst, bitLength) }
@@ -65,7 +67,7 @@ fun SettingsContent(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "ビットオーダー (MSB First)", modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.bit_order_msb), modifier = Modifier.weight(1f))
                 Switch(
                     checked = isMsbFirst,
                     onCheckedChange = { onSaveSettings(isBigEndian, it, bitLength) }
@@ -76,7 +78,7 @@ fun SettingsContent(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "ビット幅", modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.bit_width), modifier = Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.Start) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(

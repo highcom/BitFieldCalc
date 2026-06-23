@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.ui.calculation.FieldResult
 
 @Composable
@@ -21,7 +23,7 @@ fun DecodedFieldsList(fields: List<FieldResult>) {
     ) {
         item {
             Text(
-                text = "【フィールドデコード結果】",
+                text = stringResource(R.string.field_decode_result),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )

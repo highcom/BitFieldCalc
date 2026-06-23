@@ -7,8 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import java.math.BigInteger
 
 @Composable
@@ -48,7 +50,7 @@ fun NumberInputFields(
             supportingText = {
                 if (isDecOverflow) {
                     Text(
-                        text = "${bitLength}bitの上限値を超えています",
+                        text = stringResource(R.string.bit_limit_exceeded, bitLength),
                         color = MaterialTheme.colorScheme.error
                     )
                 }

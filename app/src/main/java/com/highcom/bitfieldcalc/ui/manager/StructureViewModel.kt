@@ -2,6 +2,7 @@ package com.highcom.bitfieldcalc.ui.manager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
@@ -48,24 +49,38 @@ class StructureViewModel @Inject constructor(
         tag: String?,
         bitWidth: Int,
         fields: List<FieldEntity>
-    ): Pair<Boolean, String?> {
-        if (structureName.isBlank()) return false to "構造体名を入力してください"
+    ): ValidationResult {
+        if (structureName.isBlank()) return ValidationResult(false, R.string.error_empty_name)
 
         val maxBitIndex = bitWidth - 1
         val ranges = mutableListOf<Pair<IntRange, String>>()
         for (f in fields) {
-            if (f.fieldName.isBlank()) return false to "フィールド名を入力してください"
+            if (f.fieldName.isBlank()) return ValidationResult(false, R.string.error_empty_field_name)
             if (f.msb < 0 || f.msb > maxBitIndex || f.lsb < 0 || f.lsb > maxBitIndex) {
-                return false to "ビット範囲は0〜${maxBitIndex}の間である必要があります (${f.fieldName})"
+                return ValidationResult(
+                    false,
+                    R.string.error_invalid_range,
+                    listOf(maxBitIndex, f.fieldName)
+                )
             }
-            if (f.msb < f.lsb) return false to "MSBはLSB以上である必要があります (${f.fieldName})"
+            if (f.msb < f.lsb) {
+                return ValidationResult(
+                    false,
+                    R.string.error_msb_lsb,
+                    listOf(f.fieldName)
+                )
+            }
             ranges.add((f.lsb..f.msb) to f.fieldName)
         }
 
         for (i in ranges.indices) {
             for (j in i + 1 until ranges.size) {
                 if (ranges[i].first.intersect(ranges[j].first).isNotEmpty()) {
-                    return false to "ビット範囲が重複しています: ${ranges[i].second} と ${ranges[j].second}"
+                    return ValidationResult(
+                        false,
+                        R.string.error_duplicate_range,
+                        listOf(ranges[i].second, ranges[j].second)
+                    )
                 }
             }
         }
@@ -74,7 +89,7 @@ class StructureViewModel @Inject constructor(
             val entity = StructureEntity(id = id, name = structureName, tag = tag, bitWidth = bitWidth)
             repository.insertStructureWithFields(entity, fields)
         }
-        return true to null
+        return ValidationResult(true)
     }
 
     fun pendingDeleteStructure(structure: StructureWithFields) {
@@ -121,4 +136,10 @@ class StructureViewModel @Inject constructor(
 data class StructureManagerUiState(
     val structures: List<StructureWithFields> = emptyList(),
     val lastDeletedStructure: StructureWithFields? = null
+)
+
+data class ValidationResult(
+    val success: Boolean,
+    val errorResId: Int? = null,
+    val errorArgs: List<Any> = emptyList()
 )

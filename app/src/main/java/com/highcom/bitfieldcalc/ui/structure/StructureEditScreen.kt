@@ -12,10 +12,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.ui.manager.StructureViewModel
+import com.highcom.bitfieldcalc.ui.manager.ValidationResult
 
 @Composable
 fun StructureEditScreen(
@@ -35,7 +38,7 @@ fun StructureEditScreen(
     }
 
     var fields by remember { mutableStateOf(listOf<FieldEntity>()) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var validationError by remember { mutableStateOf<ValidationResult?>(null) }
     var selectedBitWidth by remember { mutableIntStateOf(32) }
     val globalBitLength by viewModel.bitLength.collectAsState()
 
@@ -59,24 +62,24 @@ fun StructureEditScreen(
         tag = tag,
         allTags = allTags,
         fields = fields,
-        error = error,
+        validationError = validationError,
         selectedBitWidth = selectedBitWidth,
         onNameChange = { name = it },
         onTagChange = { tag = it },
         onFieldsChange = { fields = it },
         onBitWidthChange = { selectedBitWidth = it },
         onSave = {
-            val (success, msg) = viewModel.validateAndSaveStructure(
+            val result = viewModel.validateAndSaveStructure(
                 id = structureId ?: 0L,
                 structureName = name,
                 tag = tag.ifBlank { null },
                 bitWidth = selectedBitWidth,
                 fields = fields
             )
-            if (success) {
+            if (result.success) {
                 onDone()
             } else {
-                error = msg
+                validationError = result
             }
         },
         onCancel = onCancel
@@ -91,7 +94,7 @@ fun StructureEditContent(
     tag: String,
     allTags: List<String>,
     fields: List<FieldEntity>,
-    error: String?,
+    validationError: ValidationResult?,
     selectedBitWidth: Int,
     onNameChange: (String) -> Unit,
     onTagChange: (String) -> Unit,
@@ -106,29 +109,29 @@ fun StructureEditContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (structureId == null) "構造体の作成" else "構造体の編集") },
+                title = { Text(stringResource(if (structureId == null) R.string.create_structure else R.string.edit_structure)) },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Cancel")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 actions = {
                     TextButton(onClick = onSave) {
-                        Text("保存")
+                        Text(stringResource(R.string.save))
                     }
                 }
             )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            if (error != null) {
+            if (validationError != null && !validationError.success && validationError.errorResId != null) {
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = error,
+                        text = stringResource(validationError.errorResId, *validationError.errorArgs.toTypedArray()),
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -138,7 +141,7 @@ fun StructureEditContent(
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChange,
-                label = { Text("構造体名") },
+                label = { Text(stringResource(R.string.structure_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -153,7 +156,7 @@ fun StructureEditContent(
                         onTagChange(it)
                         expanded = true
                     },
-                    label = { Text("タグ名") },
+                    label = { Text(stringResource(R.string.tag_name)) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable, true),
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -183,7 +186,7 @@ fun StructureEditContent(
 
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text("ビット幅", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.bit_width), style = MaterialTheme.typography.labelLarge)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -199,12 +202,12 @@ fun StructureEditContent(
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "ビット範囲: 0〜${maxBitIndex}",
+                text = stringResource(R.string.bit_range, maxBitIndex),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "【フィールド定義リスト】", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.field_definition_list), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 IconButton(onClick = {
                     val lastField = fields.lastOrNull()
                     val nextMsb = if (lastField != null) lastField.lsb - 1 else maxBitIndex
@@ -216,7 +219,7 @@ fun StructureEditContent(
                         lsb = safeMsb
                     ))
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Field")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_field))
                 }
             }
 
@@ -252,7 +255,7 @@ fun StructureEditScreenPreview() {
                 FieldEntity(fieldName = "Field A", msb = 7, lsb = 0, structureId = 0),
                 FieldEntity(fieldName = "Field B", msb = 15, lsb = 8, structureId = 0)
             ),
-            error = null,
+            validationError = null,
             selectedBitWidth = 32,
             onNameChange = {},
             onTagChange = {},
@@ -281,11 +284,11 @@ fun FieldEditItem(
                 OutlinedTextField(
                     value = field.fieldName,
                     onValueChange = { onUpdate(field.copy(fieldName = it)) },
-                    label = { Text("名前") },
+                    label = { Text(stringResource(R.string.name)) },
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete Field")
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_field))
                 }
             }
             Row(
@@ -300,7 +303,7 @@ fun FieldEditItem(
                     maxBitIndex = maxBitIndex,
                     modifier = Modifier.width(70.dp)
                 )
-                Text("〜")
+                Text(stringResource(R.string.range_separator))
                 BitIndexInputField(
                     value = field.lsb,
                     onValueChange = { onUpdate(field.copy(lsb = it)) },

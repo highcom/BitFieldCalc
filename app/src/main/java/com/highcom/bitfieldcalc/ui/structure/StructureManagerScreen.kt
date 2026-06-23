@@ -14,8 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
@@ -53,11 +55,15 @@ fun StructureManagerContent(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val allLabel = stringResource(R.string.all)
+    val deletedMessage = stringResource(R.string.deleted_message, uiState.lastDeletedStructure?.structure?.name ?: "")
+    val undoLabel = stringResource(R.string.undo)
+
     LaunchedEffect(uiState.lastDeletedStructure) {
         if (uiState.lastDeletedStructure != null) {
             val result = snackbarHostState.showSnackbar(
-                message = "${uiState.lastDeletedStructure.structure.name} を削除しました",
-                actionLabel = "取り消す",
+                message = deletedMessage,
+                actionLabel = undoLabel,
                 duration = SnackbarDuration.Short
             )
             if (result == SnackbarResult.ActionPerformed) {
@@ -69,15 +75,15 @@ fun StructureManagerContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("構造体マネージャー") },
+                title = { Text(stringResource(R.string.structure_manager)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onAdd) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
                     }
                 }
             )
@@ -85,8 +91,8 @@ fun StructureManagerContent(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            var selectedTag by remember { mutableStateOf("すべて") }
-            val tags = listOf("すべて") + uiState.structures.mapNotNull { it.structure.tag }.distinct()
+            var selectedTag by remember { mutableStateOf(allLabel) }
+            val tags = listOf(allLabel) + uiState.structures.mapNotNull { it.structure.tag }.distinct()
             
             ScrollableTabRow(
                 selectedTabIndex = tags.indexOf(selectedTag).coerceAtLeast(0),
@@ -106,7 +112,7 @@ fun StructureManagerContent(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(8.dp)
             ) {
-                val filtered = if (selectedTag == "すべて") {
+                val filtered = if (selectedTag == allLabel) {
                     uiState.structures
                 } else {
                     uiState.structures.filter { it.structure.tag == selectedTag }
@@ -142,13 +148,13 @@ fun StructureListItem(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Menu, contentDescription = "Reorder", modifier = Modifier.padding(end = 12.dp))
+            Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.reorder), modifier = Modifier.padding(end = 12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (item.structure.isPinned) {
                         Icon(
                             Icons.Default.Star,
-                            contentDescription = "Pinned",
+                            contentDescription = stringResource(R.string.pinned),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp).padding(end = 4.dp)
                         )
@@ -156,12 +162,12 @@ fun StructureListItem(
                     Text(text = item.structure.name, style = MaterialTheme.typography.titleMedium)
                 }
                 Text(
-                    text = "${item.structure.bitWidth}bit, ${item.fields.size} fields" + (item.structure.tag?.let { " [$it]" } ?: ""),
+                    text = "${item.structure.bitWidth}bit, ${item.fields.size} fields" + (item.structure.tag?.let { " [${it}]" } ?: ""),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
             }
         }
     }

@@ -11,8 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
@@ -57,9 +59,9 @@ fun QuickSelectorContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "構造体の選択", style = MaterialTheme.typography.titleLarge)
+                Text(text = stringResource(R.string.select_structure), style = MaterialTheme.typography.titleLarge)
                 TextButton(onClick = onManageClick) {
-                    Text("構造体マネージャー")
+                    Text(stringResource(R.string.structure_manager))
                 }
             }
 
@@ -67,7 +69,7 @@ fun QuickSelectorContent(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                placeholder = { Text("🔍 構造体名やタグで検索...") },
+                placeholder = { Text(stringResource(R.string.search_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
             )
 
@@ -78,7 +80,7 @@ fun QuickSelectorContent(
                 if (pinned.isNotEmpty()) {
                     item {
                         Text(
-                            text = "お気に入り",
+                            text = stringResource(R.string.favorites),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -93,7 +95,7 @@ fun QuickSelectorContent(
                 if (others.isNotEmpty()) {
                     item {
                         Text(
-                            text = "すべての構造体",
+                            text = stringResource(R.string.all_structures),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -128,7 +130,7 @@ fun StructureItem(item: StructureWithFields, onClick: () -> Unit) {
             Text(text = item.structure.name, style = MaterialTheme.typography.bodyLarge)
             if (item.structure.tag != null) {
                 Text(
-                    text = "タグ: ${item.structure.tag}",
+                    text = stringResource(R.string.tag_label, item.structure.tag),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary
                 )

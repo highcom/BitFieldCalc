@@ -12,8 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import com.highcom.bitfieldcalc.R
 
 @Composable
 fun BitIndexInputField(
@@ -58,7 +60,7 @@ fun BitIndexInputField(
         singleLine = true,
         isError = value > maxBitIndex,
         supportingText = if (value > maxBitIndex) {
-            { Text("0〜$maxBitIndex") }
+            { Text(stringResource(R.string.range_0_to_n, maxBitIndex)) }
         } else {
             null
         }
