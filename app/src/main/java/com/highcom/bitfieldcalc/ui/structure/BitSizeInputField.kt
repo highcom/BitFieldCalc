@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BitSizeInputField(
@@ -61,3 +62,14 @@ fun BitSizeInputField(
 private fun onUpdateWithDebounce(value: Int, onValueChange: (Int) -> Unit) {
     onValueChange(value)
 }
+
+@Preview(showBackground = true)
+@Composable
+fun BitSizeInputFieldPreview() {
+    BitSizeInputField(
+        value = 8,
+        onValueChange = {},
+        maxSize = 32
+    )
+}
+

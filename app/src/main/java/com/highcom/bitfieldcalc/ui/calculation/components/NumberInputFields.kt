@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.math.BigInteger
 
@@ -63,3 +64,20 @@ fun NumberInputFields(
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun NumberInputFieldsPreview() {
+    MaterialTheme {
+        NumberInputFields(
+            hex = "0x1234",
+            dec = "4660",
+            bin = "0b1001000110100",
+            bitLength = 32,
+            onHexChanged = {},
+            onDecChanged = {},
+            onBinChanged = {}
+        )
+    }
+}
+

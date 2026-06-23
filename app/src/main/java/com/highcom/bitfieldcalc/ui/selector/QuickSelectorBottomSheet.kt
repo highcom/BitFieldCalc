@@ -11,11 +11,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
+import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
 import com.highcom.bitfieldcalc.ui.calculation.BitFieldCalcViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickSelectorBottomSheet(
     viewModel: BitFieldCalcViewModel,
@@ -25,6 +27,29 @@ fun QuickSelectorBottomSheet(
     var searchQuery by remember { mutableStateOf("") }
     val structures by viewModel.searchStructures(searchQuery).collectAsState(initial = emptyList())
 
+    QuickSelectorContent(
+        searchQuery = searchQuery,
+        structures = structures,
+        onSearchQueryChange = { searchQuery = it },
+        onDismiss = onDismiss,
+        onManageClick = onManageClick,
+        onSelectStructure = {
+            viewModel.selectStructure(it)
+            onDismiss()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QuickSelectorContent(
+    searchQuery: String,
+    structures: List<StructureWithFields>,
+    onSearchQueryChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onManageClick: () -> Unit,
+    onSelectStructure: (StructureWithFields) -> Unit
+) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxHeight(0.8f).padding(16.dp)) {
             Row(
@@ -40,7 +65,7 @@ fun QuickSelectorBottomSheet(
 
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = onSearchQueryChange,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 placeholder = { Text("🔍 構造体名やタグで検索...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
@@ -60,8 +85,7 @@ fun QuickSelectorBottomSheet(
                     }
                     items(pinned) { item ->
                         StructureItem(item) {
-                            viewModel.selectStructure(item)
-                            onDismiss()
+                            onSelectStructure(item)
                         }
                     }
                 }
@@ -76,8 +100,7 @@ fun QuickSelectorBottomSheet(
                     }
                     items(others) { item ->
                         StructureItem(item) {
-                            viewModel.selectStructure(item)
-                            onDismiss()
+                            onSelectStructure(item)
                         }
                     }
                 }
@@ -113,3 +136,32 @@ fun StructureItem(item: StructureWithFields, onClick: () -> Unit) {
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun QuickSelectorBottomSheetPreview() {
+    val mockStructures = listOf(
+        StructureWithFields(
+            structure = StructureEntity(id = 1, name = "GPIO Config", tag = "MCU", isPinned = true),
+            fields = emptyList()
+        ),
+        StructureWithFields(
+            structure = StructureEntity(id = 2, name = "Timer Control", tag = "Peripheral"),
+            fields = emptyList()
+        )
+    )
+
+    MaterialTheme {
+        // ModalBottomSheet won't show up correctly in Preview if not in a Scaffold/Box
+        QuickSelectorContent(
+            searchQuery = "",
+            structures = mockStructures,
+            onSearchQueryChange = {},
+            onDismiss = {},
+            onManageClick = {},
+            onSelectStructure = {}
+        )
+    }
+}
+

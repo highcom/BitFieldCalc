@@ -12,11 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
 import com.highcom.bitfieldcalc.ui.manager.StructureViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructureEditScreen(
     viewModel: StructureViewModel,
@@ -26,7 +26,6 @@ fun StructureEditScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var tag by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
     val allTags = remember(uiState.structures) {
         uiState.structures.mapNotNull { it.structure.tag }
@@ -39,7 +38,6 @@ fun StructureEditScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var selectedBitWidth by remember { mutableIntStateOf(32) }
     val globalBitLength by viewModel.bitLength.collectAsState()
-    val maxBitIndex = selectedBitWidth - 1
 
     LaunchedEffect(structureId) {
         if (structureId != null) {
@@ -55,6 +53,56 @@ fun StructureEditScreen(
         }
     }
 
+    StructureEditContent(
+        structureId = structureId,
+        name = name,
+        tag = tag,
+        allTags = allTags,
+        fields = fields,
+        error = error,
+        selectedBitWidth = selectedBitWidth,
+        onNameChange = { name = it },
+        onTagChange = { tag = it },
+        onFieldsChange = { fields = it },
+        onBitWidthChange = { selectedBitWidth = it },
+        onSave = {
+            val (success, msg) = viewModel.validateAndSaveStructure(
+                id = structureId ?: 0L,
+                structureName = name,
+                tag = tag.ifBlank { null },
+                bitWidth = selectedBitWidth,
+                fields = fields
+            )
+            if (success) {
+                onDone()
+            } else {
+                error = msg
+            }
+        },
+        onCancel = onCancel
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StructureEditContent(
+    structureId: Long?,
+    name: String,
+    tag: String,
+    allTags: List<String>,
+    fields: List<FieldEntity>,
+    error: String?,
+    selectedBitWidth: Int,
+    onNameChange: (String) -> Unit,
+    onTagChange: (String) -> Unit,
+    onFieldsChange: (List<FieldEntity>) -> Unit,
+    onBitWidthChange: (Int) -> Unit,
+    onSave: () -> Unit,
+    onCancel: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val maxBitIndex = selectedBitWidth - 1
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,20 +113,7 @@ fun StructureEditScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
-                        val (success, msg) = viewModel.validateAndSaveStructure(
-                            id = structureId ?: 0L,
-                            structureName = name,
-                            tag = tag.ifBlank { null },
-                            bitWidth = selectedBitWidth,
-                            fields = fields
-                        )
-                        if (success) {
-                            onDone()
-                        } else {
-                            error = msg
-                        }
-                    }) {
+                    TextButton(onClick = onSave) {
                         Text("保存")
                     }
                 }
@@ -93,7 +128,7 @@ fun StructureEditScreen(
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = error!!,
+                        text = error,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -102,7 +137,7 @@ fun StructureEditScreen(
 
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = onNameChange,
                 label = { Text("構造体名") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -115,7 +150,7 @@ fun StructureEditScreen(
                 OutlinedTextField(
                     value = tag,
                     onValueChange = {
-                        tag = it
+                        onTagChange(it)
                         expanded = true
                     },
                     label = { Text("タグ名") },
@@ -136,7 +171,7 @@ fun StructureEditScreen(
                             DropdownMenuItem(
                                 text = { Text(selectionOption) },
                                 onClick = {
-                                    tag = selectionOption
+                                    onTagChange(selectionOption)
                                     expanded = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
@@ -156,7 +191,7 @@ fun StructureEditScreen(
                 listOf(8, 16, 32, 64).forEach { width ->
                     FilterChip(
                         selected = selectedBitWidth == width,
-                        onClick = { selectedBitWidth = width },
+                        onClick = { onBitWidthChange(width) },
                         label = { Text("${width}bit") }
                     )
                 }
@@ -174,12 +209,12 @@ fun StructureEditScreen(
                     val lastField = fields.lastOrNull()
                     val nextMsb = if (lastField != null) lastField.lsb - 1 else maxBitIndex
                     val safeMsb = nextMsb.coerceAtLeast(0)
-                    fields = fields + FieldEntity(
+                    onFieldsChange(fields + FieldEntity(
                         structureId = structureId ?: 0L,
                         fieldName = "",
                         msb = safeMsb,
                         lsb = safeMsb
-                    )
+                    ))
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Field")
                 }
@@ -192,10 +227,10 @@ fun StructureEditScreen(
                         previousField = if (index > 0) fields[index - 1] else null,
                         maxBitIndex = maxBitIndex,
                         onUpdate = { updated ->
-                            fields = fields.toMutableList().apply { set(index, updated) }
+                            onFieldsChange(fields.toMutableList().apply { set(index, updated) })
                         },
                         onDelete = {
-                            fields = fields.toMutableList().apply { removeAt(index) }
+                            onFieldsChange(fields.toMutableList().apply { removeAt(index) })
                         }
                     )
                 }
@@ -203,6 +238,32 @@ fun StructureEditScreen(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun StructureEditScreenPreview() {
+    MaterialTheme {
+        StructureEditContent(
+            structureId = null,
+            name = "New Structure",
+            tag = "Test",
+            allTags = listOf("MCU", "Peripheral"),
+            fields = listOf(
+                FieldEntity(fieldName = "Field A", msb = 7, lsb = 0, structureId = 0),
+                FieldEntity(fieldName = "Field B", msb = 15, lsb = 8, structureId = 0)
+            ),
+            error = null,
+            selectedBitWidth = 32,
+            onNameChange = {},
+            onTagChange = {},
+            onFieldsChange = {},
+            onBitWidthChange = {},
+            onSave = {},
+            onCancel = {}
+        )
+    }
+}
+
 
 @Composable
 fun FieldEditItem(

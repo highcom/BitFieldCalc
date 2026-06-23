@@ -7,9 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -19,6 +19,24 @@ fun SettingsScreen(
     val isMsbFirst by viewModel.isMsbFirst.collectAsState()
     val bitLength by viewModel.bitLength.collectAsState()
 
+    SettingsContent(
+        isBigEndian = isBigEndian,
+        isMsbFirst = isMsbFirst,
+        bitLength = bitLength,
+        onBack = onBack,
+        onSaveSettings = { be, msb, len -> viewModel.saveEnvironmentSettings(be, msb, len) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsContent(
+    isBigEndian: Boolean,
+    isMsbFirst: Boolean,
+    bitLength: Int,
+    onBack: () -> Unit,
+    onSaveSettings: (Boolean, Boolean, Int) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -39,7 +57,7 @@ fun SettingsScreen(
                 Text(text = "エンディアン (Big Endian)", modifier = Modifier.weight(1f))
                 Switch(
                     checked = isBigEndian,
-                    onCheckedChange = { viewModel.saveEnvironmentSettings(it, isMsbFirst, bitLength) }
+                    onCheckedChange = { onSaveSettings(it, isMsbFirst, bitLength) }
                 )
             }
 
@@ -50,7 +68,7 @@ fun SettingsScreen(
                 Text(text = "ビットオーダー (MSB First)", modifier = Modifier.weight(1f))
                 Switch(
                     checked = isMsbFirst,
-                    onCheckedChange = { viewModel.saveEnvironmentSettings(isBigEndian, it, bitLength) }
+                    onCheckedChange = { onSaveSettings(isBigEndian, it, bitLength) }
                 )
             }
 
@@ -63,32 +81,46 @@ fun SettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = bitLength == 8,
-                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 8) }
+                            onClick = { onSaveSettings(isBigEndian, isMsbFirst, 8) }
                         )
                         Text("8 bit")
                         Spacer(modifier = Modifier.width(8.dp))
                         RadioButton(
                             selected = bitLength == 16,
-                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 16) }
+                            onClick = { onSaveSettings(isBigEndian, isMsbFirst, 16) }
                         )
                         Text("16 bit")
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = bitLength == 32,
-                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 32) }
+                            onClick = { onSaveSettings(isBigEndian, isMsbFirst, 32) }
                         )
                         Text("32 bit")
                         Spacer(modifier = Modifier.width(8.dp))
                         RadioButton(
                             selected = bitLength == 64,
-                            onClick = { viewModel.saveEnvironmentSettings(isBigEndian, isMsbFirst, 64) }
+                            onClick = { onSaveSettings(isBigEndian, isMsbFirst, 64) }
                         )
                         Text("64 bit")
                     }
                 }
             }
-
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    MaterialTheme {
+        SettingsContent(
+            isBigEndian = true,
+            isMsbFirst = true,
+            bitLength = 32,
+            onBack = {},
+            onSaveSettings = { _, _, _ -> }
+        )
+    }
+}
+

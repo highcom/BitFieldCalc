@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.highcom.bitfieldcalc.ui.calculation.FieldResult
 
@@ -47,3 +48,17 @@ fun DecodedFieldsList(fields: List<FieldResult>) {
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun DecodedFieldsListPreview() {
+    MaterialTheme {
+        DecodedFieldsList(
+            fields = listOf(
+                FieldResult("Field 1", "0x34", "52", 7, 0),
+                FieldResult("Field 2", "0x12", "18", 15, 8)
+            )
+        )
+    }
+}
+

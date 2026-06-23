@@ -14,11 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.highcom.bitfieldcalc.data.db.entity.FieldEntity
+import com.highcom.bitfieldcalc.data.db.entity.StructureEntity
 import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
+import com.highcom.bitfieldcalc.ui.manager.StructureManagerUiState
 import com.highcom.bitfieldcalc.ui.manager.StructureViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructureManagerScreen(
     viewModel: StructureViewModel,
@@ -27,17 +30,38 @@ fun StructureManagerScreen(
     onEdit: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    StructureManagerContent(
+        uiState = uiState,
+        onBack = onBack,
+        onAdd = onAdd,
+        onEdit = onEdit,
+        onDelete = { viewModel.pendingDeleteStructure(it) },
+        onRestore = { viewModel.restoreDeletedStructure() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StructureManagerContent(
+    uiState: StructureManagerUiState,
+    onBack: () -> Unit,
+    onAdd: () -> Unit,
+    onEdit: (Long) -> Unit,
+    onDelete: (StructureWithFields) -> Unit,
+    onRestore: () -> Unit
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.lastDeletedStructure) {
         if (uiState.lastDeletedStructure != null) {
             val result = snackbarHostState.showSnackbar(
-                message = "${uiState.lastDeletedStructure?.structure?.name} を削除しました",
+                message = "${uiState.lastDeletedStructure.structure.name} を削除しました",
                 actionLabel = "取り消す",
                 duration = SnackbarDuration.Short
             )
             if (result == SnackbarResult.ActionPerformed) {
-                viewModel.restoreDeletedStructure()
+                onRestore()
             }
         }
     }
@@ -61,7 +85,6 @@ fun StructureManagerScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Tag Filter (simplified)
             var selectedTag by remember { mutableStateOf("すべて") }
             val tags = listOf("すべて") + uiState.structures.mapNotNull { it.structure.tag }.distinct()
             
@@ -93,7 +116,7 @@ fun StructureManagerScreen(
                     StructureListItem(
                         item = item,
                         onEdit = { onEdit(item.structure.id) },
-                        onDelete = { viewModel.pendingDeleteStructure(item) }
+                        onDelete = { onDelete(item) }
                     )
                 }
             }
@@ -143,3 +166,30 @@ fun StructureListItem(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun StructureManagerScreenPreview() {
+    val mockStructures = listOf(
+        StructureWithFields(
+            structure = StructureEntity(id = 1, name = "GPIO Config", tag = "MCU"),
+            fields = listOf(FieldEntity(structureId = 1, fieldName = "EN", msb = 0, lsb = 0))
+        ),
+        StructureWithFields(
+            structure = StructureEntity(id = 2, name = "Timer Control", tag = "Peripheral", isPinned = true),
+            fields = listOf(FieldEntity(structureId = 2, fieldName = "MODE", msb = 3, lsb = 0))
+        )
+    )
+
+    MaterialTheme {
+        StructureManagerContent(
+            uiState = StructureManagerUiState(structures = mockStructures),
+            onBack = {},
+            onAdd = {},
+            onEdit = {},
+            onDelete = {},
+            onRestore = {}
+        )
+    }
+}
+
