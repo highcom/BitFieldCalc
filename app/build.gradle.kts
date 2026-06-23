@@ -36,6 +36,7 @@ android {
 
         manifestPlaceholders["admobAppId"] = admobProperties.getProperty("admob.app_id") ?: ""
         resValue("string", "admob_banner_unit_id", admobProperties.getProperty("admob.banner_unit_id") ?: "")
+        buildConfigField("String", "ADMOB_TEST_DEVICE_ID", "\"${admobProperties.getProperty("admob.test_device_id") ?: ""}\"")
     }
 
     buildTypes {
@@ -57,6 +58,7 @@ android {
     buildFeatures {
         compose = true
         resValues = true
+        buildConfig = true
     }
 }
 

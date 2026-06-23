@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.highcom.bitfieldcalc.BuildConfig
 import com.highcom.bitfieldcalc.R
 import com.highcom.bitfieldcalc.ui.calculation.BitFieldCalcViewModel
 import com.highcom.bitfieldcalc.ui.calculation.MainCalculationScreen
@@ -34,6 +35,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import dagger.hilt.android.AndroidEntryPoint
 
 sealed interface Screen {
@@ -52,6 +54,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Set test device ID from BuildConfig
+        val testDeviceId = BuildConfig.ADMOB_TEST_DEVICE_ID
+        if (testDeviceId.isNotEmpty()) {
+            val configuration = RequestConfiguration.Builder()
+                .setTestDeviceIds(listOf(testDeviceId))
+                .build()
+            MobileAds.setRequestConfiguration(configuration)
+        }
+
         MobileAds.initialize(this) {}
         setContent {
             AppRoot(vm = vm, structureVm = structureVm, settingsVm = settingsVm)
@@ -78,9 +90,11 @@ fun AdBanner() {
                     this.adUnitId = adUnitId
                     adListener = object : AdListener() {
                         override fun onAdLoaded() {
+                            android.util.Log.d("AdMob", "広告の読み込みに成功しました")
                             isAdLoaded.value = true
                         }
                         override fun onAdFailedToLoad(error: LoadAdError) {
+                            android.util.Log.e("AdMob", "広告の読み込みに失敗しました: ${error.message}, コード: ${error.code}")
                             isAdLoaded.value = false
                         }
                     }
