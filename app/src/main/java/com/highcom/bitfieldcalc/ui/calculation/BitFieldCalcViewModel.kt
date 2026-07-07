@@ -184,7 +184,7 @@ class BitFieldCalcViewModel @Inject constructor(
         }
     }
 
-    fun selectStructure(structure: StructureWithFields) {
+    fun selectStructure(structure: StructureWithFields?) {
         viewModelScope.launch {
             _selectedStructure.emit(structure)
         }

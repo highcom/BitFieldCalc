@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,7 +111,7 @@ fun MainCalculationContent(
     bitLength: Int,
     onNavigateToSettings: () -> Unit,
     onNavigateToManager: () -> Unit,
-    onSelectStructure: (StructureWithFields) -> Unit,
+    onSelectStructure: (StructureWithFields?) -> Unit,
     onToggleBit: (Int) -> Unit,
     onHexChanged: (String) -> Unit,
     onDecChanged: (String) -> Unit,
@@ -173,11 +174,18 @@ fun MainCalculationContent(
                     .verticalScroll(rememberScrollState())
             ) {
                 if (pinnedStructures.isNotEmpty()) {
+                    val selectedIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }
                     ScrollableTabRow(
-                        selectedTabIndex = pinnedStructures.indexOfFirst { it.structure.id == selectedStructure?.structure?.id }
-                            .coerceAtLeast(0),
+                        selectedTabIndex = if (selectedIndex >= 0) selectedIndex else 0,
                         edgePadding = 8.dp,
-                        divider = {}
+                        divider = {},
+                        indicator = { tabPositions ->
+                            if (selectedIndex >= 0) {
+                                TabRowDefaults.SecondaryIndicator(
+                                    Modifier.tabIndicatorOffset(tabPositions[selectedIndex])
+                                )
+                            }
+                        }
                     ) {
                         pinnedStructures.forEach { item ->
                             Tab(

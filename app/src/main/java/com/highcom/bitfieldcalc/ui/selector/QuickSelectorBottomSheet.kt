@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -50,7 +51,7 @@ fun QuickSelectorContent(
     onSearchQueryChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onManageClick: () -> Unit,
-    onSelectStructure: (StructureWithFields) -> Unit
+    onSelectStructure: (StructureWithFields?) -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxHeight(0.8f).padding(16.dp)) {
@@ -74,6 +75,31 @@ fun QuickSelectorContent(
             )
 
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                if (searchQuery.isEmpty()) {
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelectStructure(null) }
+                                .padding(vertical = 12.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.outline,
+                                    modifier = Modifier.padding(end = 12.dp).size(24.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.clear),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+
                 val pinned = structures.filter { it.structure.isPinned }
                 val others = structures.filter { !it.structure.isPinned }
 
