@@ -1,11 +1,16 @@
 package com.highcom.bitfieldcalc.ui.calculation.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,7 +26,8 @@ fun NumberInputFields(
     bitLength: Int,
     onHexChanged: (String) -> Unit,
     onDecChanged: (String) -> Unit,
-    onBinChanged: (String) -> Unit
+    onBinChanged: (String) -> Unit,
+    onClear: () -> Unit
 ) {
     val maxValue = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE)
     val isDecOverflow = try { BigInteger(dec) > maxValue } catch (e: Exception) { false }
@@ -37,7 +43,8 @@ fun NumberInputFields(
             digits = hexDigits,
             onDigitsChange = { onHexChanged(FixedWidthInputLogic.withPrefix(it, "0x")) },
             isCharValid = { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = true // Enable direct HEX input as requested
         )
         BlockCursorDigitField(
             label = "DEC",
@@ -47,6 +54,7 @@ fun NumberInputFields(
             isCharValid = { it in '0'..'9' },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             isError = isDecOverflow,
+            enabled = true, // Enable direct DEC input as requested
             supportingText = {
                 if (isDecOverflow) {
                     Text(
@@ -62,8 +70,19 @@ fun NumberInputFields(
             digits = binDigits,
             onDigitsChange = { onBinChanged(FixedWidthInputLogic.withPrefix(it, "0b")) },
             isCharValid = { it == '0' || it == '1' },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            enabled = true // Enable direct BIN input as requested
         )
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            OutlinedButton(onClick = onClear) {
+                Text(stringResource(R.string.clear))
+            }
+        }
     }
 }
 
@@ -78,7 +97,8 @@ fun NumberInputFieldsPreview() {
             bitLength = 32,
             onHexChanged = {},
             onDecChanged = {},
-            onBinChanged = {}
+            onBinChanged = {},
+            onClear = {}
         )
     }
 }

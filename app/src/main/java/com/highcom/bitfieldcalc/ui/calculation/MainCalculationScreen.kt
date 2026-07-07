@@ -70,6 +70,9 @@ fun MainCalculationScreen(
         onValueBChanged = { viewModel.updateValueBFromHex(it) },
         onSetA = { viewModel.setAFromCurrent() },
         onSetB = { viewModel.setBFromCurrent() },
+        onClearA = { viewModel.clearValueA() },
+        onClearB = { viewModel.clearValueB() },
+        onClearRaw = { viewModel.clearRawValue() },
         onAnd = { viewModel.performAnd() },
         onOr = { viewModel.performOr() },
         onXor = { viewModel.performXor() },
@@ -116,6 +119,9 @@ fun MainCalculationContent(
     onValueBChanged: (String) -> Unit,
     onSetA: () -> Unit,
     onSetB: () -> Unit,
+    onClearA: () -> Unit,
+    onClearB: () -> Unit,
+    onClearRaw: () -> Unit,
     onAnd: () -> Unit,
     onOr: () -> Unit,
     onXor: () -> Unit,
@@ -222,7 +228,8 @@ fun MainCalculationContent(
                     bitLength = bitLength,
                     onHexChanged = onHexChanged,
                     onDecChanged = onDecChanged,
-                    onBinChanged = onBinChanged
+                    onBinChanged = onBinChanged,
+                    onClear = onClearRaw
                 )
 
                 CalculatorSection(
@@ -232,6 +239,8 @@ fun MainCalculationContent(
                     onValueBChanged = onValueBChanged,
                     onSetA = onSetA,
                     onSetB = onSetB,
+                    onClearA = onClearA,
+                    onClearB = onClearB,
                     onAnd = onAnd,
                     onOr = onOr,
                     onXor = onXor,
@@ -291,6 +300,9 @@ fun MainCalculationScreenPreview() {
             onValueBChanged = {},
             onSetA = {},
             onSetB = {},
+            onClearA = {},
+            onClearB = {},
+            onClearRaw = {},
             onAnd = {},
             onOr = {},
             onXor = {},

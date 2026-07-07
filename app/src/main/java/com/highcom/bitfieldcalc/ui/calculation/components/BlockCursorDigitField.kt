@@ -49,6 +49,7 @@ fun BlockCursorDigitField(
     isCharValid: (Char) -> Boolean,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
+    enabled: Boolean = true,
     supportingText: @Composable (() -> Unit)? = null,
 ) {
     val digitCount = digits.length
@@ -84,17 +85,20 @@ fun BlockCursorDigitField(
     BasicTextField(
         value = textFieldValue,
         onValueChange = { proposed ->
-            val updated = FixedWidthInputLogic.applyChange(
-                current = textFieldValue,
-                proposed = proposed,
-                length = digitCount,
-                isCharValid = isCharValid
-            )
-            textFieldValue = updated
-            if (updated.text != digits) {
-                onDigitsChange(updated.text)
+            if (enabled) {
+                val updated = FixedWidthInputLogic.applyChange(
+                    current = textFieldValue,
+                    proposed = proposed,
+                    length = digitCount,
+                    isCharValid = isCharValid
+                )
+                textFieldValue = updated
+                if (updated.text != digits) {
+                    onDigitsChange(updated.text)
+                }
             }
         },
+        readOnly = !enabled,
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 56.dp)
@@ -129,12 +133,12 @@ fun BlockCursorDigitField(
                                     style = TextStyle(
                                         fontFamily = FontFamily.Monospace,
                                         fontSize = 16.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                                     )
                                 )
                             }
                             textFieldValue.text.forEachIndexed { index, char ->
-                                val isCursorCell = isFocused && index == cursorIndex
+                                val isCursorCell = enabled && isFocused && index == cursorIndex
                                 val background = if (isCursorCell) {
                                     MaterialTheme.colorScheme.primary
                                 } else {
@@ -142,14 +146,17 @@ fun BlockCursorDigitField(
                                 }
                                 val foreground = when {
                                     isCursorCell -> MaterialTheme.colorScheme.onPrimary
+                                    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                     char == '0' -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                                     else -> MaterialTheme.colorScheme.onSurface
                                 }
                                 Box(
                                     modifier = Modifier
                                         .clickable(indication = null, interactionSource = null) {
-                                            focusRequester.requestFocus()
-                                            textFieldValue = textFieldValue.copy(selection = TextRange(index))
+                                            if (enabled) {
+                                                focusRequester.requestFocus()
+                                                textFieldValue = textFieldValue.copy(selection = TextRange(index))
+                                            }
                                         }
                                         .background(background, MaterialTheme.shapes.extraSmall)
                                         .padding(horizontal = 1.dp, vertical = 2.dp),
@@ -168,7 +175,7 @@ fun BlockCursorDigitField(
                         }
                     }
                 },
-                enabled = true,
+                enabled = enabled,
                 singleLine = true,
                 visualTransformation = VisualTransformation.None,
                 interactionSource = interactionSource,
@@ -179,7 +186,7 @@ fun BlockCursorDigitField(
                 contentPadding = OutlinedTextFieldDefaults.contentPadding(),
                 container = {
                     OutlinedTextFieldDefaults.Container(
-                        enabled = true,
+                        enabled = enabled,
                         isError = isError,
                         interactionSource = interactionSource,
                         colors = colors,

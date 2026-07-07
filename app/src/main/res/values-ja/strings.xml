@@ -48,6 +48,7 @@
     <string name="calc_value_b">値 B</string>
     <string name="set_a">Aに設定</string>
     <string name="set_b">Bに設定</string>
+    <string name="clear">クリア</string>
     <string name="and">AND</string>
     <string name="or">OR</string>
     <string name="xor">XOR</string>

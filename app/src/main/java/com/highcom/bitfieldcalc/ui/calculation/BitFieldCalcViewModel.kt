@@ -163,6 +163,18 @@ class BitFieldCalcViewModel @Inject constructor(
         setRawValue(BitCalculator.shiftRight(_rawValue.value, bitLength.value))
     }
 
+    fun clearRawValue() {
+        setRawValue(BigInteger.ZERO)
+    }
+
+    fun clearValueA() {
+        _valueA.value = BigInteger.ZERO
+    }
+
+    fun clearValueB() {
+        _valueB.value = BigInteger.ZERO
+    }
+
     fun loadSelectedStructure(structureId: Long) {
         viewModelScope.launch {
             val structure = repository.getStructureWithFieldsById(structureId)

@@ -48,6 +48,7 @@
     <string name="calc_value_b">Value B</string>
     <string name="set_a">Set A</string>
     <string name="set_b">Set B</string>
+    <string name="clear">Clear</string>
     <string name="and">AND</string>
     <string name="or">OR</string>
     <string name="xor">XOR</string>

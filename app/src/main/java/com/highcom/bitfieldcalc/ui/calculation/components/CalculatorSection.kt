@@ -18,6 +18,8 @@ fun CalculatorSection(
     onValueBChanged: (String) -> Unit,
     onSetA: () -> Unit,
     onSetB: () -> Unit,
+    onClearA: () -> Unit,
+    onClearB: () -> Unit,
     onAnd: () -> Unit,
     onOr: () -> Unit,
     onXor: () -> Unit,
@@ -33,43 +35,55 @@ fun CalculatorSection(
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Value A row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Value A Section
+            Column(modifier = Modifier.fillMaxWidth()) {
                 BlockCursorDigitField(
                     label = stringResource(R.string.calc_value_a),
                     prefix = "0x",
                     digits = valueA.toString(16).uppercase(),
-                    onDigitsChange = onValueAChanged,
-                    isCharValid = { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' },
-                    modifier = Modifier.weight(1f)
+                    onDigitsChange = {}, // Read-only
+                    isCharValid = { false }, // Prevent keyboard
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = false // Further ensures no keyboard interaction
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onSetA) {
-                    Text(stringResource(R.string.set_a))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onSetA) {
+                        Text(stringResource(R.string.set_a))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(onClick = onClearA) {
+                        Text(stringResource(R.string.clear))
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Value B row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Value B Section
+            Column(modifier = Modifier.fillMaxWidth()) {
                 BlockCursorDigitField(
                     label = stringResource(R.string.calc_value_b),
                     prefix = "0x",
                     digits = valueB.toString(16).uppercase(),
-                    onDigitsChange = onValueBChanged,
-                    isCharValid = { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' },
-                    modifier = Modifier.weight(1f)
+                    onDigitsChange = {}, // Read-only
+                    isCharValid = { false }, // Prevent keyboard
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = false // Further ensures no keyboard interaction
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onSetB) {
-                    Text(stringResource(R.string.set_b))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(onClick = onSetB) {
+                        Text(stringResource(R.string.set_b))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(onClick = onClearB) {
+                        Text(stringResource(R.string.clear))
+                    }
                 }
             }
 
