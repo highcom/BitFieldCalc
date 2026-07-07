@@ -21,6 +21,7 @@ import com.highcom.bitfieldcalc.data.db.entity.StructureWithFields
 import com.highcom.bitfieldcalc.ui.calculation.components.BitGrid
 import com.highcom.bitfieldcalc.ui.calculation.components.NumberInputFields
 import com.highcom.bitfieldcalc.ui.calculation.components.DecodedFieldsList
+import com.highcom.bitfieldcalc.ui.calculation.components.CalculatorSection
 import com.highcom.bitfieldcalc.ui.selector.QuickSelectorBottomSheet
 import java.math.BigInteger
 
@@ -39,6 +40,9 @@ fun MainCalculationScreen(
     val decodedResults by viewModel.decodedResults.collectAsState()
     val isMsbFirst by viewModel.isMsbFirst.collectAsState()
     val bitLength by viewModel.bitLength.collectAsState()
+    val valueA by viewModel.valueA.collectAsState()
+    val valueB by viewModel.valueB.collectAsState()
+    val lastCCode by viewModel.lastCCode.collectAsState()
 
     var showSelector by remember { mutableStateOf(false) }
 
@@ -47,6 +51,9 @@ fun MainCalculationScreen(
         dec = dec,
         bin = bin,
         rawValue = rawValue,
+        valueA = valueA,
+        valueB = valueB,
+        lastCCode = lastCCode,
         pinnedStructures = pinnedStructures,
         selectedStructure = selectedStructure,
         decodedResults = decodedResults,
@@ -59,6 +66,15 @@ fun MainCalculationScreen(
         onHexChanged = { viewModel.updateRawValueFromHex(it) },
         onDecChanged = { viewModel.updateRawValueFromDec(it) },
         onBinChanged = { viewModel.updateRawValueFromBin(it) },
+        onValueAChanged = { viewModel.updateValueAFromHex(it) },
+        onValueBChanged = { viewModel.updateValueBFromHex(it) },
+        onSetA = { viewModel.setAFromCurrent() },
+        onSetB = { viewModel.setBFromCurrent() },
+        onAnd = { viewModel.performAnd() },
+        onOr = { viewModel.performOr() },
+        onXor = { viewModel.performXor() },
+        onShiftLeft = { viewModel.shiftLeft() },
+        onShiftRight = { viewModel.shiftRight() },
         onShowSelector = { showSelector = true }
     )
 
@@ -81,6 +97,9 @@ fun MainCalculationContent(
     dec: String,
     bin: String,
     rawValue: BigInteger,
+    valueA: BigInteger,
+    valueB: BigInteger,
+    lastCCode: String,
     pinnedStructures: List<StructureWithFields>,
     selectedStructure: StructureWithFields?,
     decodedResults: List<FieldResult>,
@@ -93,6 +112,15 @@ fun MainCalculationContent(
     onHexChanged: (String) -> Unit,
     onDecChanged: (String) -> Unit,
     onBinChanged: (String) -> Unit,
+    onValueAChanged: (String) -> Unit,
+    onValueBChanged: (String) -> Unit,
+    onSetA: () -> Unit,
+    onSetB: () -> Unit,
+    onAnd: () -> Unit,
+    onOr: () -> Unit,
+    onXor: () -> Unit,
+    onShiftLeft: () -> Unit,
+    onShiftRight: () -> Unit,
     onShowSelector: () -> Unit
 ) {
     Scaffold(
@@ -108,6 +136,27 @@ fun MainCalculationContent(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (lastCCode.isNotEmpty()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.c_code_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = lastCCode,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
@@ -175,13 +224,26 @@ fun MainCalculationContent(
                     onDecChanged = onDecChanged,
                     onBinChanged = onBinChanged
                 )
+
+                CalculatorSection(
+                    valueA = valueA,
+                    valueB = valueB,
+                    onValueAChanged = onValueAChanged,
+                    onValueBChanged = onValueBChanged,
+                    onSetA = onSetA,
+                    onSetB = onSetB,
+                    onAnd = onAnd,
+                    onOr = onOr,
+                    onXor = onXor,
+                    onShiftLeft = onShiftLeft,
+                    onShiftRight = onShiftRight
+                )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
             Box(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxWidth()
             ) {
                 DecodedFieldsList(fields = decodedResults)
@@ -207,6 +269,9 @@ fun MainCalculationScreenPreview() {
             dec = "4660",
             bin = "0b1001000110100",
             rawValue = BigInteger.valueOf(4660),
+            valueA = BigInteger.ZERO,
+            valueB = BigInteger.ZERO,
+            lastCCode = "REG |= (1 << 5);",
             pinnedStructures = listOf(mockStructure),
             selectedStructure = mockStructure,
             decodedResults = listOf(
@@ -222,6 +287,15 @@ fun MainCalculationScreenPreview() {
             onHexChanged = {},
             onDecChanged = {},
             onBinChanged = {},
+            onValueAChanged = {},
+            onValueBChanged = {},
+            onSetA = {},
+            onSetB = {},
+            onAnd = {},
+            onOr = {},
+            onXor = {},
+            onShiftLeft = {},
+            onShiftRight = {},
             onShowSelector = {}
         )
     }

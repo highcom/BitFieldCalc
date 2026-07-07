@@ -44,4 +44,14 @@
     <string name="error_msb_lsb">MSBはLSB以上である必要があります (%1$s)</string>
     <string name="error_duplicate_range">ビット範囲が重複しています: %1$s と %2$s</string>
     <string name="bits_label">ビット (%1$s)</string>
+    <string name="calc_value_a">値 A</string>
+    <string name="calc_value_b">値 B</string>
+    <string name="set_a">Aに設定</string>
+    <string name="set_b">Bに設定</string>
+    <string name="and">AND</string>
+    <string name="or">OR</string>
+    <string name="xor">XOR</string>
+    <string name="shift_left">&lt;&lt;</string>
+    <string name="shift_right">&gt;&gt;</string>
+    <string name="c_code_label">C言語コード シミュレーション:</string>
 </resources>

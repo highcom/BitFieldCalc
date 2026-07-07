@@ -51,5 +51,34 @@ class BitCalculatorTest {
         val raw = BigInteger.ZERO
         BitCalculator.extractFieldValue(raw, 0, 1, isSigned = false)
     }
+
+    @Test
+    fun bitwiseOperations() {
+        val a = BigInteger("10") // 1010
+        val b = BigInteger("12") // 1100
+        assertEquals(BigInteger("8"), BitCalculator.and(a, b, 4)) // 1000
+        assertEquals(BigInteger("14"), BitCalculator.or(a, b, 4)) // 1110
+        assertEquals(BigInteger("6"), BitCalculator.xor(a, b, 4)) // 0110
+    }
+
+    @Test
+    fun shifts() {
+        val v = BigInteger("1")
+        assertEquals(BigInteger("2"), BitCalculator.shiftLeft(v, 4))
+        assertEquals(BigInteger("4"), BitCalculator.shiftLeft(BigInteger("2"), 4))
+        assertEquals(BigInteger("2"), BitCalculator.shiftRight(BigInteger("4"), 4))
+        // test mask in shiftLeft
+        assertEquals(BigInteger("0"), BitCalculator.shiftLeft(BigInteger("8"), 4))
+    }
+
+    @Test
+    fun cCodeGeneration() {
+        // Toggle bit 5 on
+        assertEquals("REG |= (1 << 5);", BitCalculator.generateCCode(BigInteger.ZERO, BigInteger.valueOf(32), 5))
+        // Toggle bit 3 off
+        assertEquals("REG &= ~(1 << 3);", BitCalculator.generateCCode(BigInteger.valueOf(8), BigInteger.ZERO, 3))
+        // Raw set
+        assertEquals("REG = 0xAA;", BitCalculator.generateCCode(BigInteger.ZERO, BigInteger.valueOf(170)))
+    }
 }
 

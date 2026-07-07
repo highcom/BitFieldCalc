@@ -26,6 +26,15 @@ class BitFieldCalcViewModel @Inject constructor(
     private val _rawValue = MutableStateFlow(BigInteger.ZERO)
     val rawValue: StateFlow<BigInteger> = _rawValue.asStateFlow()
 
+    private val _valueA = MutableStateFlow(BigInteger.ZERO)
+    val valueA: StateFlow<BigInteger> = _valueA.asStateFlow()
+
+    private val _valueB = MutableStateFlow(BigInteger.ZERO)
+    val valueB: StateFlow<BigInteger> = _valueB.asStateFlow()
+
+    private val _lastCCode = MutableStateFlow("")
+    val lastCCode: StateFlow<String> = _lastCCode.asStateFlow()
+
     val isMsbFirst: StateFlow<Boolean> = settingsRepository.isMsbFirst
     val bitLength: StateFlow<Int> = settingsRepository.bitLength
 
@@ -88,12 +97,14 @@ class BitFieldCalcViewModel @Inject constructor(
         setRawValue(v)
     }
 
-    private fun setRawValue(v: BigInteger) {
+    private fun setRawValue(v: BigInteger, bitIndex: Int? = null) {
         val currentBitLength = bitLength.value
         val mask = BigInteger.ONE.shiftLeft(currentBitLength).subtract(BigInteger.ONE)
         val maskedValue = v.and(mask)
+        val oldVal = _rawValue.value
 
         viewModelScope.launch {
+            _lastCCode.emit(BitCalculator.generateCCode(oldVal, maskedValue, bitIndex))
             _rawValue.emit(maskedValue)
             _hex.emit("0x" + BitCalculator.toRadixString(maskedValue, 16, padTo = currentBitLength))
             _dec.emit(
@@ -111,7 +122,45 @@ class BitFieldCalcViewModel @Inject constructor(
         require(bitIndex in 0 until currentBitLength)
         val mask = BigInteger.ONE.shiftLeft(bitIndex)
         val newVal = _rawValue.value.xor(mask)
-        setRawValue(newVal)
+        setRawValue(newVal, bitIndex)
+    }
+
+    fun updateValueAFromHex(hexStr: String) {
+        val v = BitCalculator.parseStringToBigInteger(hexStr, 16)
+        _valueA.value = v
+    }
+
+    fun updateValueBFromHex(hexStr: String) {
+        val v = BitCalculator.parseStringToBigInteger(hexStr, 16)
+        _valueB.value = v
+    }
+
+    fun setAFromCurrent() {
+        _valueA.value = _rawValue.value
+    }
+
+    fun setBFromCurrent() {
+        _valueB.value = _rawValue.value
+    }
+
+    fun performAnd() {
+        setRawValue(BitCalculator.and(_valueA.value, _valueB.value, bitLength.value))
+    }
+
+    fun performOr() {
+        setRawValue(BitCalculator.or(_valueA.value, _valueB.value, bitLength.value))
+    }
+
+    fun performXor() {
+        setRawValue(BitCalculator.xor(_valueA.value, _valueB.value, bitLength.value))
+    }
+
+    fun shiftLeft() {
+        setRawValue(BitCalculator.shiftLeft(_rawValue.value, bitLength.value))
+    }
+
+    fun shiftRight() {
+        setRawValue(BitCalculator.shiftRight(_rawValue.value, bitLength.value))
     }
 
     fun loadSelectedStructure(structureId: Long) {

@@ -52,6 +52,23 @@ object BitCalculator {
         } else str
     }
 
+    fun and(a: BigInteger, b: BigInteger, bitLength: Int): BigInteger = a.and(b).and(mask(bitLength))
+    fun or(a: BigInteger, b: BigInteger, bitLength: Int): BigInteger = a.or(b).and(mask(bitLength))
+    fun xor(a: BigInteger, b: BigInteger, bitLength: Int): BigInteger = a.xor(b).and(mask(bitLength))
+
+    fun shiftLeft(v: BigInteger, bitLength: Int): BigInteger = v.shiftLeft(1).and(mask(bitLength))
+    fun shiftRight(v: BigInteger, bitLength: Int): BigInteger = v.shiftRight(1)
+
+    private fun mask(bitLength: Int) = ONE.shiftLeft(bitLength).subtract(ONE)
+
+    fun generateCCode(oldValue: BigInteger, newValue: BigInteger, bitIndex: Int? = null): String {
+        if (bitIndex != null) {
+            val isSet = newValue.testBit(bitIndex)
+            return if (isSet) "REG |= (1 << $bitIndex);" else "REG &= ~(1 << $bitIndex);"
+        }
+        return "REG = 0x${newValue.toString(16).uppercase()};"
+    }
+
     /**
      * Extract field value from rawValue in range [msb:lsb].
      * If isSigned is true, performs two's complement sign extension.

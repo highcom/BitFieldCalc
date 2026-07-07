@@ -44,4 +44,14 @@
     <string name="error_msb_lsb">MSB must be greater than or equal to LSB (%1$s)</string>
     <string name="error_duplicate_range">Bit ranges overlap: %1$s and %2$s</string>
     <string name="bits_label">Bits (%1$s)</string>
+    <string name="calc_value_a">Value A</string>
+    <string name="calc_value_b">Value B</string>
+    <string name="set_a">Set A</string>
+    <string name="set_b">Set B</string>
+    <string name="and">AND</string>
+    <string name="or">OR</string>
+    <string name="xor">XOR</string>
+    <string name="shift_left">&lt;&lt;</string>
+    <string name="shift_right">&gt;&gt;</string>
+    <string name="c_code_label">C-Code Simulation:</string>
 </resources>
